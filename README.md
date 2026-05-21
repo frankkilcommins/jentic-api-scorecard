@@ -95,10 +95,20 @@ run time, so the key never lands in your shell history:
 For AWS Bedrock with temporary credentials (e.g. `aws sts assume-role`, AWS SSO), also forward
 `-e AWS_SESSION_TOKEN`.
 
+By default the engine routes LLM calls to Bedrock-hosted Claude. To use a non-Bedrock provider you
+must point the engine at it explicitly: set `LLM_PROVIDER`, `LLM_LIGHT_PROVIDER`, and pick an
+`LLM_LIGHT_MODEL` for that provider. Without `LLM_LIGHT_MODEL` the engine falls back to a Bedrock
+model ID and the run will fail for non-Bedrock providers.
+
 Example (OpenAI, allowlisted public spec — no `JENTIC_API_KEY` needed):
 
 ```bash
-docker run --rm -e OPENAI_API_KEY ghcr.io/jentic/jentic-api-scorecard:unstable \
+docker run --rm \
+  -e OPENAI_API_KEY \
+  -e LLM_PROVIDER=openai \
+  -e LLM_LIGHT_PROVIDER=openai \
+  -e LLM_LIGHT_MODEL=gpt-4o \
+  ghcr.io/jentic/jentic-api-scorecard:unstable \
   score --with-llm \
   --url https://raw.githubusercontent.com/jentic/jentic-public-apis/refs/heads/main/apis/openapi/swagger-api/petstore/1.0.27/openapi.json \
   | jq '.summary | {score, level, grade, dimensions: [.dimensions[] | {kind, name, score, grade}]}'
