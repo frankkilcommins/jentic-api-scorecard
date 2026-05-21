@@ -46,6 +46,12 @@ score and grade. Anonymous scoring is restricted to specs in
 [jentic-public-apis](https://github.com/jentic/jentic-public-apis); other inputs require
 `JENTIC_API_KEY=mvp-preview` (a documented public placeholder for the MVP preview, not a secret).
 
+## Requirements
+
+- **Docker** installed and running. See [Docker installation](https://docs.docker.com/get-docker/).
+- Network access to `ghcr.io` (to pull the image) and to whatever URL hosts the spec you're scoring
+  (the engine fetches it from inside the container).
+
 ## Quick start
 
 ### Score an allowlisted public spec
