@@ -54,18 +54,19 @@ The npm CLI is the user-facing UX (`npx @jentic/api-scorecard score …`) per `d
 - Scaffold `packages/html-renderer/` (`@jentic/api-scorecard-html`) with the typed `render(result): string` stub only — no implementation yet.
 - README and `.claude/CLAUDE.md` repository-state sections are updated to reflect that `packages/` now exists.
 
-## Phase 3 — Pretty / JSON / Markdown output + verbose & diagnostics flags
+## Phase 3 — Pretty / JSON / Markdown output + detail levels
 
 **Goal:** ship the human-readable scorecard, the canonical JSON form, and the Markdown projection so the UX matches `docs/architecture.md` §5.
 **Depends on:** Phase 2
 **Priority:** High
 
-Phase 2 lands a working CLI that streams engine JSON. This phase layers the renderers on top so the default `npx … score` shows the scorecard headline + dimensions (matching the sample output in `docs/architecture.md` §1), with `--format`, `--verbose`, `--include-diagnostics`, `-o`, and `--quiet` doing what the spec describes.
+Phase 2 lands a working CLI that streams engine JSON. This phase layers the renderers on top so the default `npx … score` shows the scorecard headline + dimensions (matching the sample output in `docs/architecture.md` §1), with `--format`, `--detail`, `-o`, `--verbose`, and `--quiet` doing what the spec describes.
 
 - Implement `pretty` renderer (default) with headline + dimension table. Treat `summary.dimensions[]` as the canonical shape; tolerate unknown keys.
-- Implement `json` renderer (engine-verbatim, `diagnostics` array stripped unless `--include-diagnostics`).
-- Implement `markdown` renderer (Markdown table; `--include-diagnostics` adds a Markdown list).
-- Add `--verbose` (per-signal breakdown in pretty mode only — no effect on JSON / Markdown payloads).
+- Implement `json` renderer (engine-verbatim, filtered by `--detail` level).
+- Implement `markdown` renderer (Markdown table, filtered by `--detail` level).
+- Add `--detail <level>` graduated hierarchy: `summary`, `dimensions` (default), `signals`, `diagnostics`. Each level includes everything below it. Applies uniformly to all formats.
+- Add `--verbose` / `-v` for increased stderr logging (engine progress, validator timings, debug info). Does not affect the report payload.
 - Add `-o FILE` (writes report to file; spinner stays on stderr).
 - Add `--quiet` (suppresses spinner explicitly; auto-suppresses when stderr is not a TTY).
 
