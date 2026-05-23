@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { constants as osConstants } from 'node:os';
 
 import { ExitCode } from './exit-codes.ts';
@@ -8,6 +8,43 @@ export const IMAGE_NAME = 'ghcr.io/jentic/jentic-api-scorecard';
 
 export function imageRef(): string {
   return `${IMAGE_NAME}:${cliVersion}`;
+}
+
+export function imageExists(ref: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    execFile('docker', ['image', 'inspect', ref], (err) => {
+      resolve(err === null);
+    });
+  });
+}
+
+export interface PullResult {
+  exitCode: number;
+  stderr: string;
+}
+
+export function pullImage(ref: string): Promise<PullResult> {
+  return new Promise((resolve) => {
+    const child = spawn('docker', ['pull', ref], {
+      stdio: ['ignore', 'ignore', 'pipe'],
+    });
+    const stderrChunks: Buffer[] = [];
+    if (child.stderr) {
+      child.stderr.on('data', (chunk: Buffer) => {
+        stderrChunks.push(chunk);
+      });
+    }
+    child.on('error', (err: NodeJS.ErrnoException) => {
+      const exitCode = err.code === 'ENOENT' ? ExitCode.DOCKER_MISSING : ExitCode.GENERIC_ERROR;
+      resolve({ exitCode, stderr: err.message });
+    });
+    child.on('close', (code) => {
+      resolve({
+        exitCode: code ?? ExitCode.GENERIC_ERROR,
+        stderr: Buffer.concat(stderrChunks).toString('utf8'),
+      });
+    });
+  });
 }
 
 export interface DockerRunOptions {
