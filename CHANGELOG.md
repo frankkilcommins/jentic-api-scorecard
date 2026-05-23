@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.6](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.5...v1.0.0-alpha.6) (2026-05-23)
+
+### Bug Fixes
+
+- **ci:** use package URL in npm-release env ([23670d0](https://github.com/jentic/jentic-api-scorecard/commit/23670d07022d3bd81591e795df1fd6fdbc753ea2)), closes [#20](https://github.com/jentic/jentic-api-scorecard/issues/20)
+
 # [1.0.0-alpha.5](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.4...v1.0.0-alpha.5) (2026-05-23)
 
 ### Bug Fixes
