@@ -85,7 +85,7 @@ npx @jentic/api-scorecard-cli@alpha score --detail diagnostics ./openapi.yaml
 
 ## Anonymous vs keyed access
 
-OpenAPI documents hosted under [jentic-public-apis](https://github.com/jentic/jentic-public-apis)
+OpenAPI documents from [Jentic Public APIs (OAK)](https://github.com/jentic/jentic-public-apis)
 score without any key. For everything else, set the MVP preview key:
 
 ```bash
