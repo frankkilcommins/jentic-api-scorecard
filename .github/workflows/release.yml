@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: npm-release
-      url: https://www.npmjs.com/org/jentic
+      url: https://www.npmjs.com/package/@jentic/api-scorecard-cli
     outputs:
       version: ${{ steps.version.outputs.value }}
     permissions:
