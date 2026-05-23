@@ -3,6 +3,7 @@
   "version": "1.0.0-alpha.0",
   "description": "Score an OpenAPI document against the Jentic API AI Readiness Framework (JAIRF).",
   "keywords": [
+    "api",
     "openapi",
     "jentic",
     "jairf",
