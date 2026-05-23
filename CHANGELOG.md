@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.4](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.3...v1.0.0-alpha.4) (2026-05-23)
+
+### Bug Fixes
+
+- **release:** remove dist-tag alignment step ([#22](https://github.com/jentic/jentic-api-scorecard/issues/22)) ([e284923](https://github.com/jentic/jentic-api-scorecard/commit/e284923e93905985a9ac1ab8762cb66ec22ee849))
+
 # [1.0.0-alpha.3](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.2...v1.0.0-alpha.3) (2026-05-23)
 
 **Note:** Version bump only for package jentic-api-scorecard-monorepo
