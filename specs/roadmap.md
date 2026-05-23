@@ -54,36 +54,7 @@ The npm CLI is the user-facing UX (`npx @jentic/api-scorecard-cli score …`) pe
 - Scaffold `packages/formatter-html/` (`@jentic/api-scorecard-formatter-html`) with the typed `format(result): string` stub only — no implementation yet.
 - README and `.claude/CLAUDE.md` repository-state sections are updated to reflect that `packages/` now exists.
 
-## Phase 3 — Pretty / JSON / Markdown output + detail levels
-
-**Goal:** ship the human-readable scorecard, the canonical JSON form, and the Markdown projection so the UX matches `docs/architecture.md` §5.
-**Depends on:** Phase 2
-**Priority:** High
-
-Phase 2 lands a working CLI that streams engine JSON. This phase layers the renderers on top so the default `npx … score` shows the scorecard headline + dimensions (matching the sample output in `docs/architecture.md` §1), with `--format`, `--detail`, `-o`, `--verbose`, and `--quiet` doing what the spec describes.
-
-- Implement `pretty` renderer (default) with headline + dimension table. Treat `summary.dimensions[]` as the canonical shape; tolerate unknown keys.
-- Implement `json` renderer (engine-verbatim, filtered by `--detail` level).
-- Implement `markdown` renderer (Markdown table, filtered by `--detail` level).
-- Add `--detail <level>` graduated hierarchy: `summary`, `dimensions` (default), `signals`, `diagnostics`. Each level includes everything below it. Applies uniformly to all formats.
-- Add `--verbose` / `-v` for increased stderr logging (engine progress, validator timings, debug info). Does not affect the report payload.
-- Add `-o FILE` (writes report to file; spinner stays on stderr).
-- Add `--quiet` (suppresses spinner explicitly; auto-suppresses when stderr is not a TTY).
-
-## Phase 4 — npm publish CI on tag (both packages)
-
-**Goal:** automate npm publishing so cutting a git tag also publishes `@jentic/api-scorecard-cli` and `@jentic/api-scorecard-formatter-html` (Lerna fixed-version means both ship together).
-**Depends on:** Phase 3
-**Priority:** High
-
-The CLI version = image tag invariant requires that the same git tag triggers both publishes. Manual npm publish is brittle and easy to mis-version.
-
-- Add `.github/workflows/npm-publish.yml` triggered on tag refs `v*`.
-- Run `npm publish` for `packages/cli` and `packages/formatter-html` with provenance enabled (`--provenance`).
-- Smoke-test post-publish: `npx @jentic/api-scorecard-cli@<version> score --help` succeeds; the version string reported by `--version` matches the tag.
-- Document the release ritual: branch → tag → both workflows fire → image and packages land together.
-
-## Phase 5 — Husky + commit-msg hook for human commits ✅
+## Phase 3 — Husky + commit-msg hook for human commits ✅
 
 **Goal:** enforce Conventional Commits and DCO sign-off on every human / CI commit, not just Claude-driven ones.
 **Depends on:** Phase 2 (needs the npm root)
@@ -94,12 +65,85 @@ Today only the Claude PreToolUse hook checks `git commit` payloads. Direct `git 
 - Install `husky`, `@commitlint/cli`, `@commitlint/config-conventional`, and `lint-staged` at the npm root.
 - Add `.husky/commit-msg` running commitlint against the staged message.
 - Add `.husky/pre-commit` running `lint-staged` (ruff for Python files in `docker/`; eslint for TS files in `packages/`).
-- The Claude PreToolUse hook continues to soft-no-op until `node_modules/.bin/commitlint` exists; once Phase 5 ships, the hook activates.
+- The Claude PreToolUse hook continues to soft-no-op until `node_modules/.bin/commitlint` exists; once Phase 3 ships, the hook activates.
 
-## Phase 6 — `--with-llm` plumbing end-to-end
+## Phase 4 — Pretty formatter (default human-readable output)
+
+**Goal:** ship the human-readable scorecard so the default `npx … score` shows the headline + dimension table that matches the sample output in `docs/architecture.md` §1, replacing today's engine-verbatim JSON default.
+**Depends on:** Phase 2
+**Priority:** High
+
+Phase 2 lands a working CLI that streams engine JSON. This phase swaps the default to a pretty-formatted scorecard so the documented sample-output UX (`docs/architecture.md` §1) finally matches reality. **JSON access is temporarily regressed:** there is no `--format` flag yet, so engine-verbatim JSON disappears from the npm CLI until Phase 6 reintroduces it via `--format json`. Users who need JSON in the meantime can still go through the `docker run` path, which always emits engine JSON to stdout.
+
+The other knobs the spec describes (`--detail`, `--format json`, `-o`, `--verbose`, `--quiet`) each ship in their own follow-up phase below.
+
+- Implement the `pretty` formatter inside `packages/cli/src/formatters/` with the headline + dimension table. Treat `summary.dimensions[]` as the canonical shape; tolerate unknown keys.
+- Wire it as the unconditional default — no `--format` flag yet (added in Phase 6).
+- Add a stderr spinner that auto-suppresses when stderr is not a TTY (per `docs/architecture.md` §5). The explicit `--quiet` override is deferred to Phase 9.
+
+## Phase 5 — `--detail <level>` filtering
+
+**Goal:** ship the graduated `--detail` hierarchy (`summary`, `dimensions` (default), `signals`, `diagnostics`) so users can choose how much of the engine result the CLI surfaces.
+**Depends on:** Phase 4
+**Priority:** High
+
+Sequenced before the JSON formatter because `--detail` is what makes it interesting — JSON-verbatim with no filtering is just `docker run`. Settling the filter semantics first means JSON (and any later formatters such as HTML) all consume one canonical filtered shape rather than each redefining what `signals` means.
+
+- Add `--detail <level>` with values `summary`, `dimensions` (default), `signals`, `diagnostics`. Each level includes everything below it.
+- Apply the filter once, in a shared step that produces the canonical filtered result the formatters consume — see `docs/architecture.md` §7 for the per-level field map.
+- Initial wiring covers the `pretty` formatter only; subsequent formatter phases (JSON, HTML) inherit the filter automatically.
+
+## Phase 6 — JSON formatter (`--format json`)
+
+**Goal:** reintroduce engine-verbatim JSON via `--format json`, filtered by `--detail` level.
+**Depends on:** Phase 5
+**Priority:** High
+
+Phase 4 dropped engine-verbatim JSON from the npm CLI's default output. This phase introduces the `--format` flag with `pretty` (default, from Phase 4) and `json` (engine-verbatim, filtered by Phase 5's `--detail` level). After this phase, `npx … score --format json` is the supported way to get machine-readable output.
+
+- Add `--format <pretty|json>` to `packages/cli/`. Default stays `pretty`.
+- Implement the `json` formatter inside `packages/cli/src/formatters/`: pretty-printed engine JSON, filtered by `--detail`. No key renames, no restructuring (per `docs/architecture.md` §7).
+- When `--format json` is set and stdout is a TTY, still emit JSON to stdout — JSON is the documented machine-readable channel and users may want to pipe it.
+
+## Phase 7 — `--verbose` / `-v` stderr logging
+
+**Goal:** opt-in verbose stderr logging (engine progress, validator timings, debug info) without changing the report payload on stdout.
+**Depends on:** Phase 4
+**Priority:** Medium
+
+The stdout/stderr split is part of the documented UX (`docs/architecture.md` §5): stdout carries the report; stderr carries human-facing progress. `--verbose` is the dial that lets users see more on stderr when something is wrong, without making the spinner default-noisy.
+
+- Add `--verbose` / `-v` flag. Wired only to the host-side CLI logger; the report payload on stdout is unchanged.
+- Verbose output covers engine progress, validator timings, and debug info as available from the container's stderr.
+- Independent of `--quiet` (Phase 9): `--verbose` controls verbosity *level* of stderr; `--quiet` controls whether the spinner renders at all.
+
+## Phase 8 — `-o FILE` (write report to file)
+
+**Goal:** support writing the formatted report to a file path while keeping the spinner on stderr.
+**Depends on:** Phase 6 (so file output covers `pretty` and `json`)
+**Priority:** Medium
+
+`-o` is the recipe `score … --format json -o report.json` that CI integrators want for archiving artifacts.
+
+- Add `-o FILE` to `packages/cli/`. Writes the formatted report (whatever `--format` selects, whatever `--detail` selects) to the path; spinner output continues to land on stderr.
+- When `-o` is set with `--format html` (Phase 14), behavior stays the same — write the HTML to the file.
+- File-write errors surface on stderr with non-zero exit; the report is not partially written.
+
+## Phase 9 — `--quiet` (explicit spinner suppression)
+
+**Goal:** the explicit `--quiet` flag turns the spinner off even when stderr is a TTY.
+**Depends on:** Phase 4
+**Priority:** Medium
+
+Phase 4 already auto-suppresses the spinner when stderr is not a TTY (the common CI case). `--quiet` is for the interactive case where the user wants no spinner anyway — e.g. piping stderr into a file, or running inside a recording session.
+
+- Add `--quiet` to `packages/cli/`. When set, no spinner is rendered regardless of TTY detection.
+- Independent of `--verbose` (Phase 7): `--quiet` does not silence verbose / error logs, only the progress spinner.
+
+## Phase 10 — `--with-llm` plumbing end-to-end
 
 **Goal:** the CLI scans for LLM provider keys, errors fast if `--with-llm` is set without one, and forwards present keys via docker's passthrough form.
-**Depends on:** Phase 3
+**Depends on:** Phase 4
 **Priority:** Medium–High
 
 Architecture.md §5 describes `--with-llm` precisely. The container already accepts `--with-llm` and forwards `--enable-llm-analysis` to the engine. The host-side scan-and-forward is the remaining piece. Until it ships, users can only invoke `--with-llm` by piping their own `docker run -e …` invocation.
@@ -109,10 +153,10 @@ Architecture.md §5 describes `--with-llm` precisely. The container already acce
 - Forward each present key via `-e <NAME>` (docker passthrough form). Do not log keys in spinner / error / telemetry output.
 - Document the security note (provider keys appear in `docker inspect` for the run; this is standard Docker behavior, see `docs/architecture.md` §5).
 
-## Phase 7 — `--bundle` host-side fetch + bundling
+## Phase 11 — `--bundle` host-side fetch + bundling
 
 **Goal:** support scoring URLs that only the host can reach (internal networks, VPN-gated specs, auth-required URLs).
-**Depends on:** Phase 3
+**Depends on:** Phase 4
 **Priority:** Medium
 
 `--bundle` is the escape hatch from `docs/architecture.md` §5. It implies key-required (the anonymous allowlist does not apply once the source URL stops reaching the container).
@@ -121,10 +165,23 @@ Architecture.md §5 describes `--with-llm` precisely. The container already acce
 - For local paths, `--bundle` is a no-op (bundling is always how local files are handled).
 - Update the input-dispatch table in the CLI's help output to match `docs/architecture.md` §5.
 
-## Phase 8 — Real auth: replace `mvp-preview` with an HTTP validator
+## Phase 12 — npm publish CI on tag (both packages)
+
+**Goal:** automate npm publishing so cutting a git tag also publishes `@jentic/api-scorecard-cli` and `@jentic/api-scorecard-formatter-html` (Lerna fixed-version means both ship together).
+**Depends on:** Phase 4
+**Priority:** High
+
+The CLI version = image tag invariant requires that the same git tag triggers both publishes. Manual npm publish is brittle and easy to mis-version.
+
+- Add `.github/workflows/npm-publish.yml` triggered on tag refs `v*`.
+- Run `npm publish` for `packages/cli` and `packages/formatter-html` with provenance enabled (`--provenance`).
+- Smoke-test post-publish: `npx @jentic/api-scorecard-cli@<version> score --help` succeeds; the version string reported by `--version` matches the tag.
+- Document the release ritual: branch → tag → both workflows fire → image and packages land together.
+
+## Phase 13 — Real auth: replace `mvp-preview` with an HTTP validator
 
 **Goal:** `JENTIC_API_KEY=<real-key>` validates against `api.jentic.com`; the placeholder check becomes a deprecation message pointing users to signup.
-**Depends on:** Phase 4 (so signup-driven onboarding can flow through the documented `npx` UX)
+**Depends on:** Phase 12 (so signup-driven onboarding can flow through the documented `npx` UX)
 **Priority:** High
 
 The `mvp-preview` placeholder is explicitly transitional (`docs/architecture.md` §9). The phase that ships real keys is a release-gate moment for the project — it's the difference between an MVP preview and a real product. **Not a `(blocker)` today**, because the placeholder system is documented and safe; this is forward-looking work that unblocks the next product phase.
@@ -135,33 +192,24 @@ The `mvp-preview` placeholder is explicitly transitional (`docs/architecture.md`
 - Bump the engine pin if needed and rebuild the image (CLI version bump rides along).
 - Update `docs/architecture.md` §9 to mark the MVP scheme as superseded.
 
-## Phase 9 — HTML formatter implementation
+## Phase 14 — HTML formatter implementation
 
 **Goal:** `@jentic/api-scorecard-formatter-html`'s `format(result): string` ships a real HTML scorecard suitable for embedding in CI artifacts and dashboards.
-**Depends on:** Phase 3 (so the input shape — engine-verbatim JSON minus `diagnostics` unless requested — is settled)
+**Depends on:** Phase 5 (so the input shape — engine-verbatim JSON minus `diagnostics` unless requested — is settled)
 **Priority:** Medium
 
-The HTML formatter is scaffolded in `packages/formatter-html/` after Phase 2 but ships a stub. This phase lands the actual rendering.
+The HTML formatter is scaffolded in `packages/formatter-html/` after Phase 2 but ships a stub. This phase lands the actual formatting.
 
 - Implement `format(result): string` returning a single self-contained HTML document. The output is an interactive React SPA with the bundle (JS + CSS) inlined into `<script>` and `<style>` blocks — no external CDN, no sibling files, works offline. The result JSON is injected as `window.__SCORECARD__` before the bundle's `<script>` so the SPA reads it on mount with no fetch.
-- React (or Preact via `preact/compat` if bundle size becomes uncomfortable) is acceptable here because the toolchain is fully encapsulated in this package — the CLI imports the built `format(result): string` and pays no JSX/bundler weight. This is the load-bearing reason this formatter is a separate package while `pretty` / `json` / `markdown` live inside `packages/cli/src/format/`.
+- React (or Preact via `preact/compat` if bundle size becomes uncomfortable) is acceptable here because the toolchain is fully encapsulated in this package — the CLI imports the built `format(result): string` and pays no JSX/bundler weight. This is the load-bearing reason this formatter is a separate package while `pretty` / `json` / `markdown` live inside `packages/cli/src/formatters/`.
 - Render headline, dimensions, optional per-signal breakdown when the input includes signals, optional diagnostics block when present. Use virtualized rendering (e.g. `react-window`) for long lists so `--detail diagnostics` outputs at the high end (10K+ rows, ~100MB HTML) don't freeze the browser.
 - Add a CLI flag `--format html` to `packages/cli/`. Behavior when `-o` is not set: error if stdout is a TTY (refuse to dump HTML into the terminal); stream to stdout if stdout is a pipe (so `score … --format html > scorecard.html` works).
 - Snapshot-test the formatter against a representative result JSON.
 
-## Phase 10 — `--min-score N` for CI gating
-
-**Goal:** `score --min-score 70` exits non-zero if the final score is below 70, enabling CI to gate on JAIRF compliance.
-**Depends on:** Phase 3 (output formats settled)
-**Priority:** Medium
-
-Sequenced after Phase 3 ships JSON / Markdown stably — CI integrators need a stable JSON shape before the gate flag is interesting.
-
-- Add `--min-score <N>` flag that exits non-zero if `summary.score < N`. New exit code or reuse `GENERIC_ERROR=1`? Default to a new code (e.g. `7 — score below threshold`) and document it in `docs/architecture.md` §6.
-- Document the CI recipe in the README ("score --min-score 70 --format json -o report.json && upload report.json").
-
 ## Later Phases (Not Yet Planned)
 
+- `--min-score N` for CI gating — `score --min-score 70` exits non-zero (proposed exit code `7 — score below threshold`, documented in `docs/architecture.md` §6) when `summary.score < N`. Deferred until concrete CI-integrator demand surfaces; once Phase 6 ships `--format json`, integrators can already gate manually with `jq` on the JSON output. Recipe to document when this lands: `score --min-score 70 --format json -o report.json && upload report.json`.
+- Markdown formatter (`--format markdown`) — a Markdown table projection of the scorecard for pasting into PR comments / status checks. Deferred until concrete CI-integrator demand surfaces; `--format json` (Phase 6) covers the machine-readable channel in the meantime.
 - Native binary distribution via `curl -fsSL | bash` (self-extracting archive bundling Node + node_modules; platform-specific builds in CI; requires code signing for macOS/Windows)
 - CLI connecting to remote docker instance with `--api-url` option
 - Multi-spec / portfolio scoring across many APIs in one invocation

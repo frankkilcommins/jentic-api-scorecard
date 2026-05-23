@@ -153,7 +153,7 @@ docker run --pull=always --rm ghcr.io/jentic/jentic-api-scorecard:unstable \
 
 The `@jentic/api-scorecard-cli` npm CLI (in `packages/cli/`) wraps the image with a friendlier
 invocation and is built end-to-end against the published GHCR image. It currently streams the
-engine's verbatim JSON to stdout — pretty / Markdown rendering, `--detail` / `--format` / `-o` /
+engine's verbatim JSON to stdout — pretty / Markdown formatting, `--detail` / `--format` / `-o` /
 `--quiet` / `--verbose`, and the `npx @jentic/api-scorecard-cli` distribution itself land in later
 phases.
 

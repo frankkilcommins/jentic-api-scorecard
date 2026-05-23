@@ -16,9 +16,9 @@ The current state, grounded in repository evidence. Planned-but-not-built items 
 
 - **Application style:** CLI (Docker image today; the npm CLI wrapper has shipped as a smoke-only Phase 2 slice — see `docs/architecture.md` §1)
 - **Primary language:** Python 3.12 (in `docker/`); TypeScript 5.6+ (in `packages/`, npm workspaces)
-- **Rendering model:** API_ONLY — the container emits JSON to stdout. Pretty / Markdown rendering is deferred to the npm CLI.
+- **Output model:** API_ONLY — the container emits JSON to stdout. Pretty / Markdown formatting is deferred to the npm CLI.
 - **Deployment / runtime shape:** CONTAINER (`ghcr.io/jentic/jentic-api-scorecard`, multi-stage Docker build under `docker/`)
-- **Current maturity:** PROTOTYPE — the runner code, image build, tests, CI, the Phase 2 CLI smoke, and lint/commit hooks (Phase 5) all exist; renderer formats and real auth do not. See `docs/architecture.md` §2 for the design spec; see `What We Are Not Using` below for the gap.
+- **Current maturity:** PROTOTYPE — the runner code, image build, tests, CI, the Phase 2 CLI smoke, and lint/commit hooks (Phase 5) all exist; formatter output and real auth do not. See `docs/architecture.md` §2 for the design spec; see `What We Are Not Using` below for the gap.
 
 ## Core Stack
 
@@ -101,10 +101,10 @@ The current state, grounded in repository evidence. Planned-but-not-built items 
 
 These exist in `docs/architecture.md` but **not on disk**. Future phases will land them:
 
-- **`.github/workflows/npm-publish.yml`** — publish npm packages on tag (Phase 4 of the roadmap).
-- **Output formats and CLI surface.** `--format` (pretty / json / markdown / html), `--detail`, `-o`, `--quiet`, `--verbose` are deferred to Phase 3+. The CLI streams engine-verbatim JSON today.
-- **Real auth validator.** Replaces the static `mvp-preview` check with an HTTP call to `api.jentic.com`. One-function change inside the container (Phase 8).
-- **HTML formatter implementation.** `@jentic/api-scorecard-formatter-html` ships as a stub today (per the architecture doc); the actual formatter lands in Phase 9.
+- **`.github/workflows/npm-publish.yml`** — publish npm packages on tag (Phase 12 of the roadmap).
+- **Output formats and CLI surface.** `--format` (pretty / json / html), `--detail`, `-o`, `--quiet`, `--verbose` are deferred to Phase 3+. The CLI streams engine-verbatim JSON today.
+- **Real auth validator.** Replaces the static `mvp-preview` check with an HTTP call to `api.jentic.com`. One-function change inside the container (Phase 13).
+- **HTML formatter implementation.** `@jentic/api-scorecard-formatter-html` ships as a stub today (per the architecture doc); the actual formatter lands in Phase 14.
 
 ## Open Questions / Uncertain Areas
 

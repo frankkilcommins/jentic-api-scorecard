@@ -52,7 +52,7 @@ Source: https://petstore3.swagger.io/api/v3/openapi.json
 | LLM analysis | Off by default. Opt-in via `--with-llm`; CLI forwards present provider env vars (OpenAI / Anthropic / Gemini / AWS) to the container, which passes `--enable-llm-analysis` to the engine. |
 | Usage tracking | Out of scope for Delivery 1. No container-side calls to Jentic. |
 | Default output | Headline + dimensions on stdout; spinner phases on stderr. `--detail` controls payload depth (summary → dimensions → signals → diagnostics). `--format json` for machine-readable output. |
-| Out of scope (MVP) | HTML rendering wired in (formatter package scaffolded only); user-facing image flags (image management is fully abstracted by the CLI); subcommands beyond `score` (no `login` / `whoami` / etc.); creds file persistence; rate limiting beyond URL allowlist. |
+| Out of scope (MVP) | HTML formatter wired in (formatter package scaffolded only); user-facing image flags (image management is fully abstracted by the CLI); subcommands beyond `score` (no `login` / `whoami` / etc.); creds file persistence; rate limiting beyond URL allowlist. |
 
 ## 3. Component diagram
 
@@ -120,7 +120,7 @@ jentic-api-scorecard/
 │   │       ├── auth.ts                       (read JENTIC_API_KEY env)
 │   │       ├── bundle.ts                     (@redocly/openapi-core)
 │   │       ├── docker.ts                     (spawn('docker', …))
-│   │       ├── format/                       (pretty / json / markdown formatters; --format + --detail)
+│   │       ├── formatters/                   (pretty / json / markdown formatters; --format + --detail)
 │   │       └── spinner.ts                    (stderr phase spinner)
 │   └── formatter-html/                       (@jentic/api-scorecard-formatter-html — stub)
 │       ├── package.json
@@ -147,7 +147,7 @@ A few layout notes worth calling out:
 - `packages/` and `docker/` are siblings at the repo root. Lerna's workspace globs are `packages/*`; the Dockerfile is built with `docker build ./docker`. Neither tree depends on the other at build time — they only compose at runtime when the host CLI invokes the container.
 - The Python code under `docker/src/jentic_scorecard_runner/` is *image-internal* — it's never published to PyPI, never imported from anywhere outside the image. Treating it as part of the docker artifact (rather than a peer "Python project") avoids the false impression that Python is a parallel deliverable to JS.
 - `tsconfig.base.json` and `lerna.json` live at the repo root because Lerna and TypeScript expect monorepo metadata to be top-level. There's no `javascript/` wrapper because there's no symmetric `python/` to balance against — JS is the only language we publish.
-- **`pretty`, `json`, and `markdown` formatters live inside `packages/cli/src/format/`** because they're plain TS string-projections of the engine result with no toolchain weight. **`formatter-html` is a separate package** because its Phase 9 implementation is an interactive React SPA (single self-contained HTML, bundle inlined into `<script>` and `<style>` blocks) — pulling React + a bundler into `packages/cli/` would burden every `pretty`/`json` user with weight they never use. The decision rule: a formatter gets its own package iff its build/runtime toolchain materially exceeds the CLI's; otherwise it lives in the CLI. The CLI is today the only consumer of these formatters, so per-toolchain weight is the load-bearing axis for the split — not library re-use across surfaces.
+- **`pretty`, `json`, and `markdown` formatters live inside `packages/cli/src/formatters/`** because they're plain TS string-projections of the engine result with no toolchain weight. **`formatter-html` is a separate package** because its Phase 14 implementation is an interactive React SPA (single self-contained HTML, bundle inlined into `<script>` and `<style>` blocks) — pulling React + a bundler into `packages/cli/` would burden every `pretty`/`json` user with weight they never use. The decision rule: a formatter gets its own package iff its build/runtime toolchain materially exceeds the CLI's; otherwise it lives in the CLI. The CLI is today the only consumer of these formatters, so per-toolchain weight is the load-bearing axis for the split — not library re-use across surfaces.
 
 ## 5. CLI specification
 
@@ -258,7 +258,7 @@ Detail levels form a strict hierarchy — each level includes everything from th
 | `signals` | + per-signal expansion (~80–150 lines) | + `details[].dimensions[].signals[]` (~5 KB) | + signal list per dimension (~80–120 lines) | + per-signal breakdown |
 | `diagnostics` | + diagnostics grouped by source/severity (~150–500 lines) | + `diagnostics[]` array (~50–500 KB) | + diagnostics as Markdown list (~100–300 lines) | + diagnostics panel (virtualized for large counts) |
 
-The dimension layout matches `summary.dimensions[]` directly (`kind`, `name`, `score`, `grade`). JAIRF weights are not surfaced in the engine's `summary` payload, so the pretty renderer does not show them — if we want a weight column post-MVP, we hard-code the JAIRF-spec weights in the renderer rather than asking the engine for them.
+The dimension layout matches `summary.dimensions[]` directly (`kind`, `name`, `score`, `grade`). JAIRF weights are not surfaced in the engine's `summary` payload, so the pretty formatter does not show them — if we want a weight column post-MVP, we hard-code the JAIRF-spec weights in the formatter rather than asking the engine for them.
 
 Diagnostic sources mirror the engine. Severity uses LSP integers (1=error, 2=warning, 3=info, 4=hint), surfaced as labels in pretty output.
 
@@ -488,7 +488,7 @@ CLI translates these to its own exit codes plus user-friendly messages.
 
 ## 7. Result JSON schema
 
-The CLI does not invent a schema. It emits **whatever `jentic-apitools score --format json` emits, verbatim**, filtered by `--detail` level (see §5). The container always requests full output (`--include-diagnostics`) from the engine; the CLI strips fields the user didn't ask for based on `--detail`. Reformatting in the renderer (pretty output, Markdown) is a read-only projection — keys are not renamed, restructured, or filtered. The pretty/HTML/Markdown renderers tolerate unknown keys and absent optional keys, so engine bumps that add new fields don't break rendering.
+The CLI does not invent a schema. It emits **whatever `jentic-apitools score --format json` emits, verbatim**, filtered by `--detail` level (see §5). The container always requests full output (`--include-diagnostics`) from the engine; the CLI strips fields the user didn't ask for based on `--detail`. Reformatting in the formatter (pretty output, Markdown) is a read-only projection — keys are not renamed, restructured, or filtered. The pretty/HTML/Markdown formatters tolerate unknown keys and absent optional keys, so engine bumps that add new fields don't break formatting.
 
 The shape below was captured by running `jentic-apitools score https://petstore3.swagger.io/api/v3/openapi.json` against `jentic-apitools-cli==1.0.0a16`. Treat this as a sample, not a contract — the engine owns the schema.
 
@@ -581,15 +581,15 @@ The shape below was captured by running `jentic-apitools score https://petstore3
 }
 ```
 
-**Notes for renderer / consumer code:**
+**Notes for formatter / consumer code:**
 
 - Top-level: `metadata`, `apiMetadata`, `summary`, `details`, and optionally `diagnostics`. The CLI filters based on `--detail` level: `summary` strips `dimensions` from `summary` and omits `details`/`diagnostics`; `dimensions` (default) includes `summary.dimensions[]` but omits `details`/`diagnostics`; `signals` adds `details`; `diagnostics` adds `diagnostics`.
-- The headline-line in our pretty renderer maps directly: `summary.score`, `summary.level`, `summary.grade`.
-- The dimension table maps to `summary.dimensions[]` with `kind` / `name` / `intention` / `score` / `grade`. **Weights are not in the JSON anywhere** — they live only inside the engine's aggregation code. If a future renderer wants a "weight" column, hard-code the JAIRF-spec values (FC 0.16, DXJ 0.18, ARAX 0.24, AU 0.20, SEC 0.12, AID 0.10).
+- The headline-line in our pretty formatter maps directly: `summary.score`, `summary.level`, `summary.grade`.
+- The dimension table maps to `summary.dimensions[]` with `kind` / `name` / `intention` / `score` / `grade`. **Weights are not in the JSON anywhere** — they live only inside the engine's aggregation code. If a future formatter wants a "weight" column, hard-code the JAIRF-spec values (FC 0.16, DXJ 0.18, ARAX 0.24, AU 0.20, SEC 0.12, AID 0.10).
 - `--detail signals` walks `details[].dimensions[].signals[]` for the per-signal breakdown.
-- `signals[].score` is in `[0, 1]` (engine-normalized); group / dimension / overall scores are `[0, 100]`. Renderers must not multiply by 100 in one place and forget in another.
-- `signals[].metadata` is freeform per-signal — engine adds whatever context that signal cares about. Renderers should treat it as opaque (display verbatim or omit).
-- **Compatibility tactic**: the renderer reads only the keys it understands and ignores everything else. Engine version bumps that add fields (or rename signals) don't break rendering; they may cause new fields not to appear in pretty output until the renderer is updated.
+- `signals[].score` is in `[0, 1]` (engine-normalized); group / dimension / overall scores are `[0, 100]`. Formatters must not multiply by 100 in one place and forget in another.
+- `signals[].metadata` is freeform per-signal — engine adds whatever context that signal cares about. Formatters should treat it as opaque (display verbatim or omit).
+- **Compatibility tactic**: the formatter reads only the keys it understands and ignores everything else. Engine version bumps that add fields (or rename signals) don't break formatting; they may cause new fields not to appear in pretty output until the formatter is updated.
 
 ## 8. Versioning & release
 
@@ -625,7 +625,7 @@ A follow-up delivery introduces real signup at `jentic.com/signup`, real `JENTIC
 
 ## 10. Out of scope (Delivery 1)
 
-- HTML rendering wired into the CLI. The `@jentic/api-scorecard-formatter-html` package is scaffolded with a typed `format(result): string` stub so the monorepo shape and contract are in place; the implementation lands post-MVP.
+- HTML formatter wired into the CLI. The `@jentic/api-scorecard-formatter-html` package is scaffolded with a typed `format(result): string` stub so the monorepo shape and contract are in place; the implementation lands post-MVP.
 - User-facing image flags. The CLI fully abstracts image management: it always pulls the image tag matching its own version, with no user override.
 - Server-side calls to Jentic from the container or CLI: usage tracking, key validation, and rate limiting (beyond the static URL allowlist) all defer to a follow-up delivery.
 - Subcommands beyond `score` (e.g. `login`, `logout`, `whoami`, `config`, `lint`) and any persistent credentials file. Auth is env-var only.
