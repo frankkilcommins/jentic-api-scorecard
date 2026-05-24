@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.15](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.14...v1.0.0-alpha.15) (2026-05-24)
+
+### Bug Fixes
+
+- **docker-publish:** annotate index with OCI metadata ([#37](https://github.com/jentic/jentic-api-scorecard/issues/37)) ([b141d45](https://github.com/jentic/jentic-api-scorecard/commit/b141d45531cf0839a2e8b74f07b47c4ecf32faa4))
+
 # [1.0.0-alpha.14](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.13...v1.0.0-alpha.14) (2026-05-24)
 
 ### Bug Fixes
