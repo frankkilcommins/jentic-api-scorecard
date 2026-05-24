@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.11](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.10...v1.0.0-alpha.11) (2026-05-24)
+
+### Bug Fixes
+
+- **release:** use tarball CDN for SBOM attestation download ([#30](https://github.com/jentic/jentic-api-scorecard/issues/30)) ([5e6ce44](https://github.com/jentic/jentic-api-scorecard/commit/5e6ce442f2940de8dc25f98873eddad5a9ab4365))
+
 # [1.0.0-alpha.10](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.9...v1.0.0-alpha.10) (2026-05-24)
 
 ### Bug Fixes
