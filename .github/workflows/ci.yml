@@ -93,6 +93,25 @@ jobs:
       - name: Build TypeScript
         run: npx lerna run build:typescript
 
+  typescript-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.10.0
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci --engine-strict=false
+
+      - name: Run tests
+        run: npm test
+
   python-test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -112,3 +131,43 @@ jobs:
 
       - name: Run tests
         run: uv run poe test
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.10.0
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci --engine-strict=false
+
+      - name: Build CLI
+        run: npx lerna run build:typescript
+
+      - name: Resolve CLI version
+        id: cli
+        run: |
+          version=$(node -p "require('./packages/cli/package.json').version")
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build local image at the CLI's matching version
+        uses: docker/build-push-action@v7
+        with:
+          context: ./docker
+          load: true
+          tags: ghcr.io/jentic/jentic-api-scorecard:${{ steps.cli.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run e2e mocha
+        run: npx lerna run test:e2e
