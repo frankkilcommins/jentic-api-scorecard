@@ -1,5 +1,5 @@
 import { execFile, spawn } from 'node:child_process';
-import { constants as osConstants } from 'node:os';
+import { constants as osConstants, platform } from 'node:os';
 
 import { ExitCode } from './exit-codes.ts';
 import { cliVersion } from './version.ts';
@@ -51,6 +51,9 @@ export interface DockerRunOptions {
   args: string[];
   stdinPayload?: string;
   forwardJenticKey: boolean;
+  forwardEnvVars: string[];
+  forwardEnvOverrides: Map<string, string>;
+  needsHostNetwork: boolean;
 }
 
 export interface DockerRunResult {
@@ -69,6 +72,23 @@ export function runDocker(opts: DockerRunOptions): Promise<DockerRunResult> {
 
   if (opts.forwardJenticKey) {
     dockerArgs.push('-e', 'JENTIC_API_KEY');
+  }
+
+  for (const name of opts.forwardEnvVars) {
+    const override = opts.forwardEnvOverrides.get(name);
+    if (override !== undefined) {
+      dockerArgs.push('-e', `${name}=${override}`);
+    } else {
+      dockerArgs.push('-e', name);
+    }
+  }
+
+  if (opts.needsHostNetwork) {
+    if (platform() === 'linux') {
+      dockerArgs.push('--network', 'host');
+    } else {
+      dockerArgs.push('--add-host=host.docker.internal:host-gateway');
+    }
   }
 
   dockerArgs.push(imageRef());
