@@ -4,6 +4,8 @@ import { bundleSpec } from '../bundle.ts';
 import { DEFAULT_DETAIL, DetailLevel, filterByDetail } from '../detail.ts';
 import { imageExists, imageRef, pullImage, runDocker } from '../docker.ts';
 import { ExitCode } from '../exit-codes.ts';
+import { DEFAULT_FORMAT, Format } from '../format.ts';
+import { formatJson } from '../formatters/json.ts';
 import { formatPretty } from '../formatters/pretty.ts';
 import { detectLlmEnv } from '../llm-env.ts';
 import { ScorecardResult } from '../result.ts';
@@ -12,6 +14,7 @@ import { spin, done, clearSpinner } from '../spinner.ts';
 export interface ScoreOptions {
   withLlm?: boolean;
   detail?: DetailLevel;
+  format?: Format;
 }
 
 function isURL(input: string): boolean {
@@ -135,11 +138,17 @@ export async function runScore(input: string, options: ScoreOptions): Promise<nu
     return result.exitCode;
   }
 
+  const format = options.format ?? DEFAULT_FORMAT;
+
   let parsed: ScorecardResult;
   try {
     parsed = JSON.parse(result.stdout) as ScorecardResult;
   } catch {
     clearSpinner();
+    if (format === Format.JSON) {
+      process.stderr.write('error: engine output was not valid JSON.\n');
+      return ExitCode.ENGINE_FAILURE;
+    }
     process.stderr.write(
       'warning: engine output was not valid JSON; passing through raw output.\n',
     );
@@ -152,7 +161,8 @@ export async function runScore(input: string, options: ScoreOptions): Promise<nu
 
   const detail = options.detail ?? DEFAULT_DETAIL;
   const filtered = filterByDetail(parsed, detail);
-  const output = formatPretty(filtered, input, { detail });
+  const output =
+    format === Format.JSON ? formatJson(filtered) : formatPretty(filtered, input, { detail });
   process.stdout.write(output);
 
   return ExitCode.SUCCESS;

@@ -300,16 +300,20 @@ function appendDiagnostics(lines: string[], diagnostics: Diagnostic[] | undefine
   }
 }
 
+const JSON_HINT_RECIPE = '--format json --detail diagnostics';
+
 function appendHint(lines: string[], detail: DetailLevel): void {
   if (detail === DetailLevel.SUMMARY) {
     lines.push('');
     lines.push(chalk.dim('  Run with --detail dimensions for the dimension table.'));
+    lines.push(chalk.dim(`  Full report: ${JSON_HINT_RECIPE}`));
     return;
   }
 
   if (detail === DetailLevel.DIMENSIONS) {
     lines.push('');
     lines.push(chalk.dim('  Run with --detail signals for signal breakdown.'));
+    lines.push(chalk.dim(`  Full report: ${JSON_HINT_RECIPE}`));
     return;
   }
 
@@ -318,5 +322,6 @@ function appendHint(lines: string[], detail: DetailLevel): void {
     lines.push(
       chalk.dim('  Run with --detail diagnostics for severity counts and a preview of findings.'),
     );
+    lines.push(chalk.dim(`  Full evidence: ${JSON_HINT_RECIPE}`));
   }
 }
