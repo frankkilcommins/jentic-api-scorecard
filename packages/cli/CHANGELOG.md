@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.22](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.21...v1.0.0-alpha.22) (2026-05-26)
+
+### Features
+
+- **cli:** ship --format json (phase 6) ([#52](https://github.com/jentic/jentic-api-scorecard/issues/52)) ([fda9084](https://github.com/jentic/jentic-api-scorecard/commit/fda9084157c262e3adc87f8ca0f61b1e59a9f95d)), closes [#53](https://github.com/jentic/jentic-api-scorecard/issues/53) [#51](https://github.com/jentic/jentic-api-scorecard/issues/51)
+
 # [1.0.0-alpha.21](https://github.com/jentic/jentic-api-scorecard/compare/v1.0.0-alpha.20...v1.0.0-alpha.21) (2026-05-25)
 
 **Note:** Version bump only for package @jentic/api-scorecard-cli
