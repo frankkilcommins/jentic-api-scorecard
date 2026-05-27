@@ -59,6 +59,42 @@ describe('score command — e2e against docker', function () {
     });
   });
 
+  describe('stream interleaving (regression: #84)', function () {
+    let exitCode: number | null;
+    let merged: string;
+
+    before(function () {
+      // Merge stderr into stdout so we can observe the actual emission
+      // order users see on a TTY. Paths are passed via env to avoid any
+      // shell-interpolation hazard if the repo lives under a path that
+      // contains shell metacharacters.
+      const result = spawnSync('bash', ['-c', 'node "$CLI" score "$SPEC" 2>&1'], {
+        env: {
+          ...process.env,
+          JENTIC_API_KEY: 'mvp-preview',
+          CLI: CLI_BIN,
+          SPEC: SAMPLE_SPEC,
+        },
+        encoding: 'utf8',
+        timeout: E2E_TIMEOUT_MS,
+      });
+      exitCode = result.status;
+      merged = strip(result.stdout ?? '');
+    });
+
+    it('exits 0', function () {
+      expect(exitCode).to.equal(0);
+    });
+
+    it("emits 'Scoring done in …' before the report headline", function () {
+      const doneIdx = merged.indexOf('Scoring done in');
+      const reportIdx = merged.indexOf('API Readiness Scorecard');
+      expect(doneIdx, 'spinner success line missing').to.be.greaterThan(-1);
+      expect(reportIdx, 'report headline missing').to.be.greaterThan(-1);
+      expect(doneIdx).to.be.lessThan(reportIdx);
+    });
+  });
+
   describe('--detail summary', function () {
     let exitCode: number | null;
     let stdout: string;
@@ -317,6 +353,9 @@ describe('score command — e2e against docker', function () {
       );
       expect(result.status).to.not.equal(0);
       expect(result.stderr).to.include('failed to write');
+      // Suppress success chrome on the failure path so the user does not
+      // see ✔ followed by an error.
+      expect(result.stderr).to.not.include('Scoring done in');
     } finally {
       rmSync(workDir, { recursive: true, force: true });
     }
