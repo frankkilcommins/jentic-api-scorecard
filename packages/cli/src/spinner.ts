@@ -2,8 +2,16 @@ import ora, { type Ora } from 'ora';
 
 // Single process-wide spinner — concurrent score invocations would interleave.
 let spinner: Ora | null = null;
+let quiet = false;
+
+export function setQuiet(value: boolean): void {
+  quiet = value;
+}
 
 export function spin(message: string): void {
+  if (quiet) {
+    return;
+  }
   if (spinner) {
     spinner.text = message;
     return;
@@ -12,6 +20,9 @@ export function spin(message: string): void {
 }
 
 export function done(message: string): void {
+  if (quiet) {
+    return;
+  }
   if (spinner) {
     spinner.succeed(message);
     spinner = null;
