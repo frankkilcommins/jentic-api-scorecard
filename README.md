@@ -44,7 +44,7 @@ per-dimension scores, and rolls those up into a single weighted score and grade.
 npm install -g @jentic/api-scorecard-cli@alpha
 ```
 
-This installs the CLI globally. The scoring engine (Docker image) is downloaded automatically
+This installs the latest alpha of the CLI globally. The scoring engine (Docker image) is downloaded automatically
 the first time you run `score` — allow a minute or two on a typical connection.
 
 Verify the install:
@@ -55,9 +55,10 @@ jentic-api-scorecard --version
 
 > **Prefer zero-install?** You can skip the global install and use `npx` — every example in
 > this README works with `npx @jentic/api-scorecard-cli@alpha` in place of
-> `jentic-api-scorecard`. The main difference: `npx` always resolves the latest `@alpha`
-> release on each invocation, while `npm install -g` pins you to the installed version until
-> you explicitly update.
+> `jentic-api-scorecard`. Pin to a specific release with
+> `npx @jentic/api-scorecard-cli@<version>` (e.g. `@1.0.0-alpha.18`); the `@alpha` tag
+> resolves to the latest alpha on each invocation, while `npm install -g` pins you to the
+> installed version until you explicitly update.
 
 ## Try it now
 
