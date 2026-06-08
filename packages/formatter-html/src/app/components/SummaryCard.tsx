@@ -1,15 +1,7 @@
 import type { ApiMetadata, EngineMetadata, Summary } from '../types.ts';
 
 import CircularProgress from './CircularProgress.tsx';
-
-const getGradeColor = (grade: string): string => {
-  const letter = grade.charAt(0);
-  if (letter === 'A') return 'hsl(142, 71%, 45%)'; // excellent — green
-  if (letter === 'B') return 'hsl(165, 82%, 35%)'; // good — teal
-  if (letter === 'C') return 'hsl(45, 93%, 47%)'; // fair — amber
-  if (letter === 'D') return 'hsl(25, 95%, 53%)'; // poor — orange
-  return 'hsl(0, 84%, 60%)'; // failing — red
-};
+import { getGradeColor } from './scoreColors.ts';
 
 // Engine version is `<engine>+jairf.<framework>` (e.g. `0.4.1+jairf.1.0.0`). Mirror
 // the CLI pretty formatter: strip the `jairf.` name token, keep the full framework

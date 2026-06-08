@@ -1,10 +1,4 @@
-const getScoreColor = (score: number): string => {
-  if (score >= 70) return 'hsl(142, 71%, 45%)'; // excellent — green
-  if (score >= 60) return 'hsl(165, 82%, 35%)'; // good — teal
-  if (score >= 50) return 'hsl(45, 93%, 47%)'; // fair — amber
-  if (score >= 40) return 'hsl(25, 95%, 53%)'; // poor — orange
-  return 'hsl(0, 84%, 60%)'; // failing — red
-};
+import { getScoreColor } from './scoreColors.ts';
 
 interface CircularProgressProps {
   score: number;
