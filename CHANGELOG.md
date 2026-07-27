@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.10.1](https://github.com/jentic/jentic-api-scorecard/compare/v1.10.0...v1.10.1) (2026-07-21)
+
+### Bug Fixes
+
+- **improve:** correct oasdiff invocation and exit-code contract ([8a52e5e](https://github.com/jentic/jentic-api-scorecard/commit/8a52e5eccb13db5ac43b7637e52b1e17da69a36b)), closes [#303](https://github.com/jentic/jentic-api-scorecard/issues/303)
+- **improve:** gate re-score on new validation errors vs baseline ([1314839](https://github.com/jentic/jentic-api-scorecard/commit/1314839e1ae6c428c1f6ff90704ee8fe329eaa3f)), closes [#303](https://github.com/jentic/jentic-api-scorecard/issues/303)
+
+### Features
+
+- **improve:** add change-scope modes + oasdiff to skill ([573e82c](https://github.com/jentic/jentic-api-scorecard/commit/573e82cffd170617cb93d89dfa9e6b9bc0d1b417)), closes [#303](https://github.com/jentic/jentic-api-scorecard/issues/303)
+- **improve:** mirror modes + oasdiff into agent and references ([ed59329](https://github.com/jentic/jentic-api-scorecard/commit/ed59329e595b4bcfdae5f31de8ab2802e139ddaf)), closes [#303](https://github.com/jentic/jentic-api-scorecard/issues/303)
+
 # [1.10.0](https://github.com/jentic/jentic-api-scorecard/compare/v1.9.3...v1.10.0) (2026-07-11)
 
 ### Bug Fixes
