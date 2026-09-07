@@ -356,7 +356,7 @@ Phase 21 shipped the `jentic-api-improve` skill; running it with `--with-llm` in
 - Update README section + `docs/architecture.md` / `.claude/CLAUDE.md` + any documentation.
 - The SkillSpector needs to keep passing.
 
-## Phase 24 — Add `detail` prop to `<Scorecard>` React component
+## Phase 24 — Add `detail` prop to `<Scorecard>` React component ✅
 
 **Goal:** expose a `detail` prop on the `<Scorecard>` component in
 `@jentic/api-scorecard-formatter-html/react` that controls rendering depth
