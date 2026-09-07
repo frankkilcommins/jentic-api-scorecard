@@ -1,6 +1,6 @@
 ---
 name: jentic-api-scorecard
-description: Use the @jentic/api-scorecard-cli to score an OpenAPI document against the Jentic API AI Readiness Framework (JAIRF). Use this skill whenever the user wants to score, grade, lint, or assess the AI-readiness / agent-readiness / quality of an OpenAPI (Swagger) spec — by local file or URL — or asks how to run the jentic-api-scorecard CLI, wire it into CI, produce a JSON or HTML scorecard, enable LLM-backed analysis, or interpret its score, dimensions, signals, or exit codes.
+description: Use the @jentic/api-scorecard-cli to score an OpenAPI document against the Jentic API AI Readiness Framework (JAIRF). Use this skill whenever the user wants to score, grade, lint, or assess the AI-readiness / agent-readiness / quality of an OpenAPI (Swagger) spec — by local file or URL — or asks how to run the jentic-api-scorecard CLI, wire it into CI, produce a JSON or HTML scorecard, reformat a saved scorecard, enable LLM-backed analysis, or interpret its score, dimensions, signals, or exit codes.
 ---
 
 # Scoring OpenAPI documents with @jentic/api-scorecard-cli
@@ -16,13 +16,13 @@ is pulled automatically on first run.
 
 ## The one rule: don't invent flags
 
-This CLI has exactly **one command (`score`) and six options** (`--with-llm`,
-`--bundle`, `-d/--detail`, `-f/--format`, `-o/--output`, `-q/--quiet`), plus the
-built-in `-h/--help` and `-V/--version` — all listed in full below. It does **not**
-have flags for multiple-file output directories, config files, watch mode,
-batch/glob input, custom rulesets, or thresholds — do not guess or fabricate any of
-these. If you are unsure whether something is supported, run
-`npx @jentic/api-scorecard-cli score --help` and trust its output over memory.
+This CLI has exactly **two commands** — `score` and `convert` — with the flags
+listed in full below. It does **not** have flags for multiple-file output
+directories, config files, watch mode, batch/glob input, custom rulesets, or
+thresholds — do not guess or fabricate any of these. If you are unsure whether
+something is supported, run
+`npx @jentic/api-scorecard-cli score --help` or
+`npx @jentic/api-scorecard-cli convert --help` and trust the output over memory.
 
 ## Install / invoke
 
@@ -84,6 +84,12 @@ JENTIC_API_KEY=$KEY npx @jentic/api-scorecard-cli@latest score ./openapi.yaml --
 
 # Fetch + bundle a host-only URL (internal/VPN/auth-gated) on the host, then score (key required):
 JENTIC_API_KEY=$KEY npx @jentic/api-scorecard-cli@latest score https://internal.example.com/openapi.yaml --bundle
+
+# Score once, reformat many times without re-scoring (score-once / format-many pattern):
+JENTIC_API_KEY=$KEY npx @jentic/api-scorecard-cli@latest score ./openapi.yaml \
+  --format json --detail diagnostics --output report.json
+npx @jentic/api-scorecard-cli@latest convert report.json --format html -o scorecard.html
+npx @jentic/api-scorecard-cli@latest convert report.json --format sarif -o results.sarif
 ```
 
 ## The `score` command surface (complete)
@@ -119,6 +125,34 @@ projects `diagnostics[]` only as a SARIF 2.1.0 document for GitHub code-scanning
 (one run per validator source, logical locations only — no inline PR-diff
 annotations); it always emits full diagnostics regardless of `--detail` and warns
 on stderr if an explicit non-`diagnostics` `--detail` is combined with it.
+
+## The `convert` command surface (complete)
+
+Reformats a saved scorecard JSON file without re-scoring — no Docker, no key, no
+network call. Useful for producing multiple output formats from a single `score`
+run.
+
+```
+jentic-api-scorecard convert <input> [options]
+```
+
+`<input>` is **either** an `https://` URL **or** a local file path to a scorecard
+JSON file (produced by `score --format json`).
+
+| Flag | Default | Choices | What it does |
+|---|---|---|---|
+| `-d, --detail <level>` | `dimensions` | `summary`, `dimensions`, `signals`, `diagnostics` | Payload depth, applied on top of what was saved. |
+| `-f, --format <fmt>` | `pretty` | `pretty`, `json`, `html`, `markdown`, `sarif` | Output encoding. Same semantics as `score --format`. |
+| `-o, --output <file>` | stdout | — | Write the report to `<file>`. |
+| `-h, --help` | — | — | Show usage for `convert`. |
+
+**Constraint:** For lossless reformatting (HTML, SARIF, full JSON), save at
+`--detail diagnostics`. A scorecard saved at a shallower detail level cannot have
+missing fields recovered at `convert` time.
+
+**`convert` exit codes:** `0` = success; `1` = generic error (input neither a URL
+nor an existing file, fetch/read failure, not valid JSON, not a scorecard, write
+failure).
 
 ## CI integration
 
@@ -187,5 +221,9 @@ Check these to react correctly to failures — they are a stable contract.
 - **Exit 8 with `--with-llm`** — provider credentials are wrong/unreachable; the run
   is suppressed so a falsely-perfect score isn't reported. Re-run without `--with-llm`
   for a valid non-LLM score, or fix the provider per `references/llm-analysis.md`.
-- **When in doubt** — run `npx @jentic/api-scorecard-cli score --help`. Don't invent
-  flags that aren't in the table above.
+- **Need multiple output formats without re-scoring** — score once with
+  `--format json --detail diagnostics -o report.json`, then use `convert` to
+  derive HTML, SARIF, Markdown etc. with no Docker/key/network required.
+- **When in doubt** — run `npx @jentic/api-scorecard-cli score --help` or
+  `npx @jentic/api-scorecard-cli convert --help`. Don't invent flags that aren't
+  in the tables above.

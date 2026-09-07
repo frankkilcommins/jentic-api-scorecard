@@ -1,5 +1,6 @@
 import { Command, Option } from 'commander';
 
+import { runConvert } from './commands/convert.ts';
 import { runScore } from './commands/score.ts';
 import { DEFAULT_DETAIL, DETAIL_LEVELS, DetailLevel } from './detail.ts';
 import { ExitCode } from './exit-codes.ts';
@@ -76,6 +77,48 @@ export async function main(argv: string[] = process.argv): Promise<void> {
           format: opts.format,
           output: opts.output,
           quiet: opts.quiet,
+        });
+        process.exitCode = exitCode;
+      },
+    );
+
+  program
+    .command('convert')
+    .description('Reformat a saved scorecard JSON file without re-scoring.')
+    .argument('<input>', 'https:// URL or local file path to a scorecard JSON file')
+    .addOption(
+      new Option('-d, --detail <level>', 'Payload depth (applied on top of the saved level)')
+        .choices([...DETAIL_LEVELS])
+        .default(DEFAULT_DETAIL),
+    )
+    .addOption(
+      new Option('-f, --format <fmt>', 'Output encoding')
+        .choices([...FORMATS])
+        .default(DEFAULT_FORMAT),
+    )
+    .option('-o, --output <file>', 'Write the formatted report to <file> instead of stdout')
+    .action(
+      async (
+        input: string,
+        opts: {
+          detail: DetailLevel;
+          format: Format;
+          output?: string;
+        },
+      ) => {
+        const verdict = validateScoreOptions(
+          { format: opts.format, output: opts.output },
+          process.stdout.isTTY === true,
+        );
+        if (verdict.error !== null) {
+          process.stderr.write(`error: ${verdict.error}\n`);
+          process.exitCode = ExitCode.GENERIC_ERROR;
+          return;
+        }
+        const exitCode = await runConvert(input, {
+          detail: opts.detail,
+          format: opts.format,
+          output: opts.output,
         });
         process.exitCode = exitCode;
       },
