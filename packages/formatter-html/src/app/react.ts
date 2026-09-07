@@ -5,6 +5,7 @@
 // The internal building blocks (SummaryCard, DimensionCard, …) stay unexported until
 // there's a concrete consumer — adding them later is non-breaking; removing is not.
 export { default as Scorecard } from './components/Scorecard.tsx';
+export { DetailLevel, DETAIL_LEVELS, DEFAULT_DETAIL } from './detail.ts';
 
 export type {
   ScorecardData,
