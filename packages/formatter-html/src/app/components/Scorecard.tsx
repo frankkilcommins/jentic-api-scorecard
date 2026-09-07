@@ -1,5 +1,5 @@
 import type { ScorecardData } from '../types.ts';
-import { DEFAULT_DETAIL, type DetailLevel } from '../detail.ts';
+import { DEFAULT_DETAIL, DetailLevel } from '../detail.ts';
 
 import DiagnosticsSection from './DiagnosticsSection.tsx';
 import DimensionCard from './DimensionCard.tsx';
@@ -23,7 +23,7 @@ export default function Scorecard({ data, detail = DEFAULT_DETAIL }: ScorecardPr
       <SummaryCard apiMetadata={data.apiMetadata} summary={data.summary} metadata={data.metadata} />
 
       {/* Overview Section — only when per-dimension detail is present and detail !== 'summary' */}
-      {allDimensions.length > 0 && detail !== 'summary' && (
+      {allDimensions.length > 0 && detail !== DetailLevel.SUMMARY && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Overview</h2>
@@ -39,7 +39,7 @@ export default function Scorecard({ data, detail = DEFAULT_DETAIL }: ScorecardPr
       )}
 
       {/* Diagnostics Section — only when detail='diagnostics' and diagnostics are present */}
-      {data.diagnostics && data.diagnostics.length > 0 && detail === 'diagnostics' && (
+      {data.diagnostics && data.diagnostics.length > 0 && detail === DetailLevel.DIAGNOSTICS && (
         <div className="mt-8">
           <DiagnosticsSection diagnostics={data.diagnostics} />
         </div>
