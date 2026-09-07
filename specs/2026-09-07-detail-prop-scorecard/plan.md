@@ -36,17 +36,23 @@
    - `detail="diagnostics"` → all three sections present.
    - prop omitted → renders identically to `detail="diagnostics"` (backward-compat assertion).
 
-## Group 4 — Verify
+## Group 4 — Docs + lifecycle
 
-9. `npm test -w @jentic/api-scorecard-formatter-html` exits 0 — all suites pass including the
-   updated `app.test.tsx`.
+9. Append ` ✅` (a single space followed by the U+2705 checkmark) to the
+   `## Phase 24 — Add \`detail\` prop to \`<Scorecard>\` React component` heading in
+   `specs/roadmap.md`, leaving the rest of the block in place.
 
-10. `npm run lint -w @jentic/api-scorecard-formatter-html` exits 0.
+## Group 5 — Verify
 
-11. `npx tsc --noEmit -p packages/formatter-html/tsconfig.react.json` exits 0 — confirms
+10. `npm test -w @jentic/api-scorecard-formatter-html` exits 0 — all suites pass including the
+    updated `app.test.tsx`.
+
+11. `npm run lint -w @jentic/api-scorecard-formatter-html` exits 0.
+
+12. `npx tsc --noEmit -p packages/formatter-html/tsconfig.react.json` exits 0 — confirms
     `DetailLevel` is reachable within the `src/app/` compile scope and the `detail` prop types
     check correctly.
 
-12. Consuming-side type check: a scratch `import { Scorecard, DetailLevel } from
+13. Consuming-side type check: a scratch `import { Scorecard, DetailLevel } from
     '@jentic/api-scorecard-formatter-html/react'` in an isolated `.ts` file resolves without type
     errors, confirming the export is wired in the package `exports` map.
