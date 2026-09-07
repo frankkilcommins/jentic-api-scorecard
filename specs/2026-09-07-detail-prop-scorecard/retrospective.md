@@ -1,6 +1,4 @@
-# Phase 24 Retrospective Draft — Add `detail` prop to `<Scorecard>` React component
-
-> **Status:** draft — promote to `retrospective.md` (edit + rename) or delete before merge.
+# Phase 24 Retrospective — Add `detail` prop to `<Scorecard>` React component
 
 ## Spec deviations
 
