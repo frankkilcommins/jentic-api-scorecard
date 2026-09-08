@@ -28,8 +28,8 @@ export default function Scorecard({ data, detail = DEFAULT_DETAIL }: ScorecardPr
         metadata={data.metadata}
       />
 
-      {/* Overview Section — at dimensions/signals/diagnostics level; per-signal inline
-          diagnostics are added at signals/diagnostics level only */}
+      {/* Overview Section — at dimensions/signals/diagnostics level; diagnostics are only
+          shown at diagnostics level */}
       {allDimensions.length > 0 && detail !== DetailLevel.SUMMARY && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-6">
