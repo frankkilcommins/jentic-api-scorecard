@@ -151,11 +151,11 @@ describe('Scorecard detail prop', function () {
     expect(html).to.not.contain('Diagnostics');
   });
 
-  it('shows dimension circles, hides Overview and Diagnostics at detail="dimensions"', function () {
+  it('shows dimension circles and Overview, hides Diagnostics at detail="dimensions"', function () {
     const html = renderScorecard({ data: fixture, detail: 'dimensions' });
     expect(html).to.contain('Foundational Score'); // summary.dimensions circles shown
-    expect(html).to.not.contain('Overview');
-    expect(html).to.not.contain('Diagnostics');
+    expect(html).to.contain('Overview'); // Overview section shown
+    expect(html).to.not.contain('Diagnostics'); // DiagnosticsSection hidden
   });
 
   it('shows dimension circles and Overview, hides Diagnostics at detail="signals"', function () {
