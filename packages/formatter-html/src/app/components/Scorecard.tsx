@@ -19,11 +19,16 @@ export default function Scorecard({ data, detail = DEFAULT_DETAIL }: ScorecardPr
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
-      {/* Summary Card */}
-      <SummaryCard apiMetadata={data.apiMetadata} summary={data.summary} metadata={data.metadata} />
+      {/* Summary Card — dimension circles are absent at summary level, matching CLI behaviour */}
+      <SummaryCard
+        apiMetadata={data.apiMetadata}
+        summary={detail === DetailLevel.SUMMARY ? { ...data.summary, dimensions: undefined } : data.summary}
+        metadata={data.metadata}
+      />
 
-      {/* Overview Section — only when per-dimension detail is present and detail !== 'summary' */}
-      {allDimensions.length > 0 && detail !== DetailLevel.SUMMARY && (
+      {/* Overview Section — only at signals/diagnostics level, matching CLI behaviour where
+          --detail dimensions omits per-signal details entirely */}
+      {allDimensions.length > 0 && detail !== DetailLevel.SUMMARY && detail !== DetailLevel.DIMENSIONS && (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Overview</h2>

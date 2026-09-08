@@ -112,9 +112,15 @@ describe('App graceful degradation', function () {
 });
 
 describe('Scorecard detail prop', function () {
-  // Full-depth fixture: has details (so Overview renders) and diagnostics.
+  // Full-depth fixture: has summary.dimensions (circles in SummaryCard), details (Overview),
+  // and diagnostics — covering all four CLI detail levels.
   const fixture = {
-    summary: { score: 66, level: 'ai-aware', grade: 'B' },
+    summary: {
+      score: 66,
+      level: 'ai-aware',
+      grade: 'B',
+      dimensions: [{ kind: 'FC', name: 'Foundational Score', score: 70, grade: 'A-' }],
+    },
     apiMetadata: {
       name: 'Detail Prop Test API',
       operationCount: 1,
@@ -138,32 +144,37 @@ describe('Scorecard detail prop', function () {
     return renderToStaticMarkup(createElement(Scorecard, props));
   }
 
-  it('hides Overview and Diagnostics at detail="summary"', function () {
+  it('hides dimension circles, Overview and Diagnostics at detail="summary"', function () {
     const html = renderScorecard({ data: fixture, detail: 'summary' });
+    expect(html).to.not.contain('Foundational Score'); // summary.dimensions circles suppressed
     expect(html).to.not.contain('Overview');
     expect(html).to.not.contain('Diagnostics');
   });
 
-  it('shows Overview, hides Diagnostics at detail="dimensions"', function () {
+  it('shows dimension circles, hides Overview and Diagnostics at detail="dimensions"', function () {
     const html = renderScorecard({ data: fixture, detail: 'dimensions' });
-    expect(html).to.contain('Overview');
+    expect(html).to.contain('Foundational Score'); // summary.dimensions circles shown
+    expect(html).to.not.contain('Overview');
     expect(html).to.not.contain('Diagnostics');
   });
 
-  it('shows Overview, hides Diagnostics at detail="signals"', function () {
+  it('shows dimension circles and Overview, hides Diagnostics at detail="signals"', function () {
     const html = renderScorecard({ data: fixture, detail: 'signals' });
+    expect(html).to.contain('Foundational Score');
     expect(html).to.contain('Overview');
     expect(html).to.not.contain('Diagnostics');
   });
 
-  it('shows Overview and Diagnostics at detail="diagnostics"', function () {
+  it('shows dimension circles, Overview and Diagnostics at detail="diagnostics"', function () {
     const html = renderScorecard({ data: fixture, detail: 'diagnostics' });
+    expect(html).to.contain('Foundational Score');
     expect(html).to.contain('Overview');
     expect(html).to.contain('Diagnostics');
   });
 
   it('shows everything when detail prop is omitted (backward-compat)', function () {
     const html = renderScorecard({ data: fixture });
+    expect(html).to.contain('Foundational Score');
     expect(html).to.contain('Overview');
     expect(html).to.contain('Diagnostics');
   });
