@@ -1,6 +1,7 @@
-import { existsSync, readFileSync, statSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { DEFAULT_BUNDLE_TIMEOUT_MS } from '../bundle.ts';
 import { DEFAULT_DETAIL, DetailLevel, filterByDetail } from '../detail.ts';
 import { ExitCode } from '../exit-codes.ts';
 import { DEFAULT_FORMAT, Format } from '../format.ts';
@@ -9,6 +10,7 @@ import { formatJson } from '../formatters/json.ts';
 import { formatMarkdown } from '../formatters/markdown.ts';
 import { formatPretty } from '../formatters/pretty.ts';
 import { formatSarif } from '../formatters/sarif.ts';
+import { isExistingFile, isScorecardShape, isURL } from '../input.ts';
 import { writeReport } from '../output.ts';
 import { ScorecardResult } from '../result.ts';
 
@@ -18,24 +20,22 @@ export interface ConvertOptions {
   output?: string;
 }
 
-function isScorecardShape(value: unknown): value is ScorecardResult {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-  if (!('summary' in value)) return false;
-  const summary = (value as { summary: unknown }).summary;
-  if (typeof summary !== 'object' || summary === null || Array.isArray(summary)) return false;
-  const s = summary as { score?: unknown; level?: unknown; grade?: unknown };
-  return typeof s.score === 'number' && typeof s.level === 'string' && typeof s.grade === 'string';
-}
-
-function isURL(input: string): boolean {
-  return /^https?:\/\//i.test(input);
-}
-
-function isExistingFile(input: string): boolean {
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort(new Error(`fetch timed out after ${Math.round(timeoutMs / 1000)}s`));
+  }, timeoutMs);
   try {
-    return existsSync(input) && statSync(input).isFile();
-  } catch {
-    return false;
+    return await fetch(url, { signal: controller.signal });
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw controller.signal.reason instanceof Error
+        ? controller.signal.reason
+        : new Error(String(controller.signal.reason));
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -44,7 +44,7 @@ export async function runConvert(input: string, options: ConvertOptions): Promis
 
   if (isURL(input)) {
     try {
-      const response = await fetch(input);
+      const response = await fetchWithTimeout(input, DEFAULT_BUNDLE_TIMEOUT_MS);
       if (!response.ok) {
         process.stderr.write(
           `error: failed to fetch '${input}': ${response.status} ${response.statusText}\n`,

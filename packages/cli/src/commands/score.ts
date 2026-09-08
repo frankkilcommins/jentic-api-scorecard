@@ -1,5 +1,3 @@
-import { existsSync, statSync } from 'node:fs';
-
 import { bundleSpec } from '../bundle.ts';
 import { DEFAULT_DETAIL, DetailLevel, filterByDetail } from '../detail.ts';
 import { imageExists, imageRef, pullImage, runDocker } from '../docker.ts';
@@ -10,6 +8,7 @@ import { formatJson } from '../formatters/json.ts';
 import { formatMarkdown } from '../formatters/markdown.ts';
 import { formatPretty } from '../formatters/pretty.ts';
 import { formatSarif } from '../formatters/sarif.ts';
+import { isExistingFile, isScorecardShape, isURL } from '../input.ts';
 import { detectLlmEnv } from '../llm-env.ts';
 import { detectLlmFailure, formatLlmFailureError } from '../llm-failure.ts';
 import { writeReport } from '../output.ts';
@@ -28,21 +27,6 @@ export interface ScoreOptions {
 export type ParseEngineOutputResult =
   | { ok: true; parsed: ScorecardResult }
   | { ok: false; exitCode: ExitCode; stderr: string; stdout: string };
-
-function isScorecardShape(value: unknown): value is ScorecardResult {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return false;
-  }
-  if (!('summary' in value)) {
-    return false;
-  }
-  const summary = (value as { summary: unknown }).summary;
-  if (typeof summary !== 'object' || summary === null || Array.isArray(summary)) {
-    return false;
-  }
-  const s = summary as { score?: unknown; level?: unknown; grade?: unknown };
-  return typeof s.score === 'number' && typeof s.level === 'string' && typeof s.grade === 'string';
-}
 
 export function tryParseEngineOutput(stdout: string, format: Format): ParseEngineOutputResult {
   let value: unknown;
@@ -75,18 +59,6 @@ function invalidEngineOutput(format: Format, stdout: string): ParseEngineOutputR
     stderr: 'warning: engine output was not a valid scorecard; passing through raw output.\n',
     stdout,
   };
-}
-
-function isURL(input: string): boolean {
-  return /^https?:\/\//i.test(input);
-}
-
-function isExistingFile(input: string): boolean {
-  try {
-    return existsSync(input) && statSync(input).isFile();
-  } catch {
-    return false;
-  }
 }
 
 export async function runScore(input: string, options: ScoreOptions): Promise<number> {
@@ -264,7 +236,7 @@ export async function runScore(input: string, options: ScoreOptions): Promise<nu
   const detail = options.detail ?? DEFAULT_DETAIL;
   // SARIF projects diagnostics[], which only survive at the deepest detail level.
   // Honoring a lower --detail would emit an empty document, so SARIF always reads
-  // the unfiltered result (validateScoreOptions warns when an explicit --detail is
+  // the unfiltered result (validateFormatOptions warns when an explicit --detail is
   // overridden).
   const filtered = filterByDetail(parsed, detail);
   const output =

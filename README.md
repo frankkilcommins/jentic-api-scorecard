@@ -316,7 +316,7 @@ jentic-api-scorecard score <input> [options]
 
 | Name | Description |
 |---|---|
-| `<input>` | `https://` URL or local file path to an OpenAPI document. Required. |
+| `<input>` | `http(s)://` URL or local file path to an OpenAPI document. Required. |
 
 #### Options
 
@@ -353,7 +353,7 @@ jentic-api-scorecard score <input> [options]
 
 ### `convert`
 
-Reformat a saved scorecard JSON file without re-scoring. Useful for producing multiple output formats from a single `score` run — no Docker, no key, no network call.
+Reformat a saved scorecard JSON file without re-scoring. Useful for producing multiple output formats from a single `score` run — no Docker or API key required (a URL `<input>` is still fetched over HTTP).
 
 ```
 jentic-api-scorecard convert <input> [options]
@@ -376,16 +376,18 @@ jentic-api-scorecard convert report.json --format sarif -o results.sarif
 
 | Name | Description |
 |---|---|
-| `<input>` | `https://` URL or local file path to a scorecard JSON file (produced by `score --format json`). Required. |
+| `<input>` | `http(s)://` URL or local file path to a scorecard JSON file (produced by `score --format json`). Required. |
 
 #### `convert` options
 
 | Flag | Default | Choices | Description |
 |---|---|---|---|
 | `-d, --detail <level>` | `dimensions` | `summary`, `dimensions`, `signals`, `diagnostics` | Payload depth applied on top of the saved level. |
-| `-f, --format <fmt>` | `pretty` | `pretty`, `json`, `html`, `markdown`, `sarif` | Output encoding. Same semantics as `score --format`. |
+| `-f, --format <fmt>` | `pretty` | `pretty`, `json`, `html`, `markdown`, `sarif` | Output encoding. Same semantics as `score --format`, including the SARIF exception below. |
 | `-o, --output <file>` | stdout | — | Write the formatted report to `<file>`. |
 | `-h, --help` | — | — | Show usage for `convert`. |
+
+`--format sarif` always emits the full diagnostics regardless of `--detail` (same as `score`); an explicit non-`diagnostics` `--detail` combined with `--format sarif` prints a warning on stderr rather than silently being ignored.
 
 #### `convert` exit codes
 
@@ -449,7 +451,7 @@ for the full provider matrix (cloud and local Ollama) and the variable reference
 
 | Input | Default | Description |
 |---|---|---|
-| `input` | — | **Required.** `https://` URL or local file path to an OpenAPI document. |
+| `input` | — | **Required.** `http(s)://` URL or local file path to an OpenAPI document. |
 | `api-key` | — | Jentic API key. Required for local files and non-OAK URLs; never logged. |
 | `github-token` | workflow token | Token for the SARIF upload (see fork PRs below). |
 | `min-score` | — | Fail when the score is below this. Unset = no gate. |

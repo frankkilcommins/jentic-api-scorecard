@@ -38,7 +38,7 @@ jentic-api-scorecard score <input> [options]
 npx @jentic/api-scorecard-cli@<version> score <input> [options]
 ```
 
-`<input>` is **either** an `https://` URL **or** a local file path to an OpenAPI
+`<input>` is **either** an `http(s)://` URL **or** a local file path to an OpenAPI
 document. Anything that is neither a URL nor an existing file exits with code 1.
 
 ## Authentication: when a key is required
@@ -128,15 +128,15 @@ on stderr if an explicit non-`diagnostics` `--detail` is combined with it.
 
 ## The `convert` command surface (complete)
 
-Reformats a saved scorecard JSON file without re-scoring — no Docker, no key, no
-network call. Useful for producing multiple output formats from a single `score`
-run.
+Reformats a saved scorecard JSON file without re-scoring — no Docker or API key
+required (a URL `<input>` is still fetched over HTTP). Useful for producing
+multiple output formats from a single `score` run.
 
 ```
 jentic-api-scorecard convert <input> [options]
 ```
 
-`<input>` is **either** an `https://` URL **or** a local file path to a scorecard
+`<input>` is **either** an `http(s)://` URL **or** a local file path to a scorecard
 JSON file (produced by `score --format json`).
 
 | Flag | Default | Choices | What it does |

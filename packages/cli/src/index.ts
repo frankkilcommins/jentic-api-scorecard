@@ -5,7 +5,7 @@ import { runScore } from './commands/score.ts';
 import { DEFAULT_DETAIL, DETAIL_LEVELS, DetailLevel } from './detail.ts';
 import { ExitCode } from './exit-codes.ts';
 import { DEFAULT_FORMAT, FORMATS, Format } from './format.ts';
-import { validateScoreOptions } from './validate.ts';
+import { validateFormatOptions } from './validate.ts';
 import { cliVersion } from './version.ts';
 
 export async function main(argv: string[] = process.argv): Promise<void> {
@@ -19,7 +19,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
   program
     .command('score')
     .description('Score an OpenAPI document by URL or local file path.')
-    .argument('<input>', 'https:// URL or local file path to an OpenAPI document')
+    .argument('<input>', 'http(s):// URL or local file path to an OpenAPI document')
     .option('--with-llm', 'Enable LLM-backed analysis in the engine', false)
     .option(
       '--bundle',
@@ -51,7 +51,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
         },
         command: Command,
       ) => {
-        const verdict = validateScoreOptions(
+        const verdict = validateFormatOptions(
           {
             format: opts.format,
             output: opts.output,
@@ -85,7 +85,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
   program
     .command('convert')
     .description('Reformat a saved scorecard JSON file without re-scoring.')
-    .argument('<input>', 'https:// URL or local file path to a scorecard JSON file')
+    .argument('<input>', 'http(s):// URL or local file path to a scorecard JSON file')
     .addOption(
       new Option('-d, --detail <level>', 'Payload depth (applied on top of the saved level)')
         .choices([...DETAIL_LEVELS])
@@ -105,15 +105,24 @@ export async function main(argv: string[] = process.argv): Promise<void> {
           format: Format;
           output?: string;
         },
+        command: Command,
       ) => {
-        const verdict = validateScoreOptions(
-          { format: opts.format, output: opts.output },
+        const verdict = validateFormatOptions(
+          {
+            format: opts.format,
+            output: opts.output,
+            detail: opts.detail,
+            detailIsExplicit: command.getOptionValueSource('detail') === 'cli',
+          },
           process.stdout.isTTY === true,
         );
         if (verdict.error !== null) {
           process.stderr.write(`error: ${verdict.error}\n`);
           process.exitCode = ExitCode.GENERIC_ERROR;
           return;
+        }
+        if (verdict.warning !== null) {
+          process.stderr.write(`warning: ${verdict.warning}\n`);
         }
         const exitCode = await runConvert(input, {
           detail: opts.detail,
