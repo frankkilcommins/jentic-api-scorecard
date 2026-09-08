@@ -22,30 +22,34 @@ export default function Scorecard({ data, detail = DEFAULT_DETAIL }: ScorecardPr
       {/* Summary Card — dimension circles are absent at summary level, matching CLI behaviour */}
       <SummaryCard
         apiMetadata={data.apiMetadata}
-        summary={detail === DetailLevel.SUMMARY ? { ...data.summary, dimensions: undefined } : data.summary}
+        summary={
+          detail === DetailLevel.SUMMARY ? { ...data.summary, dimensions: undefined } : data.summary
+        }
         metadata={data.metadata}
       />
 
       {/* Overview Section — only at signals/diagnostics level, matching CLI behaviour where
           --detail dimensions omits per-signal details entirely */}
-      {allDimensions.length > 0 && detail !== DetailLevel.SUMMARY && detail !== DetailLevel.DIMENSIONS && (
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Overview</h2>
-            <span className="text-gray-600">
-              Overall score: {Math.round(data.summary.score)} out of 100
-            </span>
-          </div>
+      {allDimensions.length > 0 &&
+        detail !== DetailLevel.SUMMARY &&
+        detail !== DetailLevel.DIMENSIONS && (
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Overview</h2>
+              <span className="text-gray-600">
+                Overall score: {Math.round(data.summary.score)} out of 100
+              </span>
+            </div>
 
-          {allDimensions.map((dimension, index) => (
-            <DimensionCard
-              key={index}
-              dimension={dimension}
-              diagnostics={detail === DetailLevel.DIAGNOSTICS ? data.diagnostics : undefined}
-            />
-          ))}
-        </div>
-      )}
+            {allDimensions.map((dimension, index) => (
+              <DimensionCard
+                key={index}
+                dimension={dimension}
+                diagnostics={detail === DetailLevel.DIAGNOSTICS ? data.diagnostics : undefined}
+              />
+            ))}
+          </div>
+        )}
 
       {/* Diagnostics Section — only when detail='diagnostics' and diagnostics are present */}
       {data.diagnostics && data.diagnostics.length > 0 && detail === DetailLevel.DIAGNOSTICS && (
