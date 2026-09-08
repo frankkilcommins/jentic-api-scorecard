@@ -10,12 +10,14 @@ All of the following must be true before this branch is merged.
 npm test -w @jentic/api-scorecard-formatter-html
 ```
 
-The `app.test.tsx` suite (SSR-based, against the petstore fixture which includes `details` and
+The `app.test.tsx` suite (SSR-based, against an inline fixture which includes `details` and
 `diagnostics`) asserts:
 
 - `<Scorecard data={fixture} detail="summary" />` — rendered HTML contains the summary card; does
   NOT contain the text "Overview".
 - `<Scorecard data={fixture} detail="dimensions" />` — rendered HTML contains "Overview"; does NOT
+  contain the diagnostics section.
+- `<Scorecard data={fixture} detail="signals" />` — rendered HTML contains "Overview"; does NOT
   contain the diagnostics section.
 - `<Scorecard data={fixture} detail="diagnostics" />` — rendered HTML contains all three sections.
 - `<Scorecard data={fixture} />` (prop omitted) — rendered HTML is identical to

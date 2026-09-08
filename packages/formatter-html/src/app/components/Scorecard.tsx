@@ -33,7 +33,11 @@ export default function Scorecard({ data, detail = DEFAULT_DETAIL }: ScorecardPr
           </div>
 
           {allDimensions.map((dimension, index) => (
-            <DimensionCard key={index} dimension={dimension} diagnostics={data.diagnostics} />
+            <DimensionCard
+              key={index}
+              dimension={dimension}
+              diagnostics={detail === DetailLevel.DIAGNOSTICS ? data.diagnostics : undefined}
+            />
           ))}
         </div>
       )}
