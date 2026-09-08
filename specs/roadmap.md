@@ -371,6 +371,18 @@ prop that defaults to `diagnostics` (backward-compatible, renders everything pre
 `summary | dimensions | signals | diagnostics` to progressively restrict output. `DetailLevel` is
 added to `packages/formatter-html/src/app/` and re-exported from the `./react` entry. Refs #341.
 
+## Phase 25 — Export SummaryCard and DimensionCard from `./react` Entry
+
+**Goal:** Export `SummaryCard`, `DimensionCard`, and their prop interfaces from the `./react` entry so consumers can compose custom layouts without re-implementing rendering.
+**Depends on:** none (self-contained — builds on Phase 14's `./react` entry and Phase 24's detail prop, both already shipped)
+**Priority:** Medium–High
+
+- Export `SummaryCard`, `DimensionCard`, and their prop interfaces (`SummaryCardProps`, `DimensionCardProps`) from `packages/formatter-html/src/app/react.ts`.
+- Confirm both components are included in the transpiled `dist/react/` output (verify `tsconfig.react.json` covers the new exports; no changes expected but must be checked).
+- Add SSR smoke tests in `packages/formatter-html/test/` confirming `SummaryCard` and `DimensionCard` render without crashing when consumed as direct imports with minimal props.
+- Keep all components below `SummaryCard`/`DimensionCard` (`SignalCard`, `CircularProgress`, `GradeBadge`, individual metadata panels, etc.) unexported — concrete consumer demand is the gate for future additions.
+- Update `README.md` and `.claude/CLAUDE.md` to document the expanded `./react` public surface.
+
 ## Later Phases (Not Yet Planned)
 
 - `--min-score N` as a first-class CLI flag for CI gating — `score --min-score 70` exits non-zero (proposed exit code `9 — score below threshold`; codes `7`/`8` are taken by `RATE_LIMITED`/`LLM_FAILURE`) when `summary.score < N`. This is the *CLI-flag* form; Phase 19's GitHub Action already gates on the score in its wrapper (reading `summary.score` from `--format json`), so the flag is only needed for non-Action integrators. Deferred until such demand surfaces; integrators can already gate manually with `jq` on the JSON output. Recipe to document when this lands: `score --min-score 70 --format json -o report.json && upload report.json`.
