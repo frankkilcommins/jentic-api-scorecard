@@ -3,6 +3,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import App from '../src/app/App.tsx';
+import { Scorecard } from '../src/app/react.ts';
 
 // App reads window.__SCORECARD__ (set by format()'s injection). In this test env
 // import.meta.env.DEV is falsy, so the dev-fixture fallback is inactive and we see
@@ -107,5 +108,74 @@ describe('App graceful degradation', function () {
       expect(renderWith(payload), `${level} renders`).to.not.contain(EMPTY_STATE);
       expect(renderWith(payload), `${level} shows headline`).to.contain('Sample');
     }
+  });
+});
+
+describe('Scorecard detail prop', function () {
+  // Full-depth fixture: has summary.dimensions (circles in SummaryCard), details (Overview),
+  // and diagnostics — covering all four CLI detail levels.
+  const fixture = {
+    summary: {
+      score: 66,
+      level: 'ai-aware',
+      grade: 'B',
+      dimensions: [{ kind: 'FC', name: 'Foundational Score', score: 70, grade: 'A-' }],
+    },
+    apiMetadata: {
+      name: 'Detail Prop Test API',
+      operationCount: 1,
+      schemaCount: 0,
+      tagCount: 0,
+      securitySchemeCount: 0,
+    },
+    details: [
+      {
+        kind: 'FC',
+        name: 'Foundational Compliance',
+        score: 70,
+        grade: 'A-',
+        dimensions: [{ kind: 'FC_DIM', name: 'Validity', score: 70, grade: 'A-' }],
+      },
+    ],
+    diagnostics: [{ code: 'C001', message: 'test finding', severity: 1, source: 'spectral' }],
+  };
+
+  function renderScorecard(props: Parameters<typeof Scorecard>[0]): string {
+    return renderToStaticMarkup(createElement(Scorecard, props));
+  }
+
+  it('hides dimension circles, Overview and Diagnostics at detail="summary"', function () {
+    const html = renderScorecard({ data: fixture, detail: 'summary' });
+    expect(html).to.not.contain('Foundational Score'); // summary.dimensions circles suppressed
+    expect(html).to.not.contain('Overview');
+    expect(html).to.not.contain('Diagnostics');
+  });
+
+  it('shows dimension circles and Overview, hides Diagnostics at detail="dimensions"', function () {
+    const html = renderScorecard({ data: fixture, detail: 'dimensions' });
+    expect(html).to.contain('Foundational Score'); // summary.dimensions circles shown
+    expect(html).to.contain('Overview'); // Overview section shown
+    expect(html).to.not.contain('Diagnostics'); // DiagnosticsSection hidden
+  });
+
+  it('shows dimension circles and Overview, hides Diagnostics at detail="signals"', function () {
+    const html = renderScorecard({ data: fixture, detail: 'signals' });
+    expect(html).to.contain('Foundational Score');
+    expect(html).to.contain('Overview');
+    expect(html).to.not.contain('Diagnostics');
+  });
+
+  it('shows dimension circles, Overview and Diagnostics at detail="diagnostics"', function () {
+    const html = renderScorecard({ data: fixture, detail: 'diagnostics' });
+    expect(html).to.contain('Foundational Score');
+    expect(html).to.contain('Overview');
+    expect(html).to.contain('Diagnostics');
+  });
+
+  it('shows everything when detail prop is omitted (backward-compat)', function () {
+    const html = renderScorecard({ data: fixture });
+    expect(html).to.contain('Foundational Score');
+    expect(html).to.contain('Overview');
+    expect(html).to.contain('Diagnostics');
   });
 });

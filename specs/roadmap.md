@@ -356,6 +356,21 @@ Phase 21 shipped the `jentic-api-improve` skill; running it with `--with-llm` in
 - Update README section + `docs/architecture.md` / `.claude/CLAUDE.md` + any documentation.
 - The SkillSpector needs to keep passing.
 
+## Phase 24 — Add `detail` prop to `<Scorecard>` React component ✅
+
+**Goal:** expose a `detail` prop on the `<Scorecard>` component in
+`@jentic/api-scorecard-formatter-html/react` that controls rendering depth
+(`summary` / `dimensions` / `signals` / `diagnostics`), mirroring the CLI's `--detail` flag.
+**Depends on:** Phase 14 (the `./react` entry that ships the `Scorecard` component)
+**Priority:** Medium–High
+
+Consumers embedding the scorecard in their own React app currently have no typed way to restrict
+what the component renders — the only option is to strip keys from the `data` prop before
+passing it, a documented phase-1 workaround. This phase formalises the contract: a typed `detail`
+prop that defaults to `diagnostics` (backward-compatible, renders everything present) and accepts
+`summary | dimensions | signals | diagnostics` to progressively restrict output. `DetailLevel` is
+added to `packages/formatter-html/src/app/` and re-exported from the `./react` entry. Refs #341.
+
 ## Later Phases (Not Yet Planned)
 
 - `--min-score N` as a first-class CLI flag for CI gating — `score --min-score 70` exits non-zero (proposed exit code `9 — score below threshold`; codes `7`/`8` are taken by `RATE_LIMITED`/`LLM_FAILURE`) when `summary.score < N`. This is the *CLI-flag* form; Phase 19's GitHub Action already gates on the score in its wrapper (reading `summary.score` from `--format json`), so the flag is only needed for non-Action integrators. Deferred until such demand surfaces; integrators can already gate manually with `jq` on the JSON output. Recipe to document when this lands: `score --min-score 70 --format json -o report.json && upload report.json`.
