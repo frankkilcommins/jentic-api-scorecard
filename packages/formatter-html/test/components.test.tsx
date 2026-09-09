@@ -1,22 +1,28 @@
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
 import { expect } from 'chai';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import type { ApiMetadata, DetailGroup, Diagnostic, Dimension, Summary } from '../src/app/types.ts';
-import ApiMetadataCard from '../src/app/components/ApiMetadataCard.tsx';
-import CircularProgress from '../src/app/components/CircularProgress.tsx';
-import DimensionCard from '../src/app/components/DimensionCard.tsx';
-import DiagnosticsSection from '../src/app/components/DiagnosticsSection.tsx';
-import GradeBadge from '../src/app/components/GradeBadge.tsx';
-import SummaryCard from '../src/app/components/SummaryCard.tsx';
+import {
+  ApiMetadataCard,
+  CircularProgress,
+  DimensionCard,
+  DiagnosticsSection,
+  GradeBadge,
+  SummaryCard,
+} from '../src/app/react.ts';
 
-import fixture from '../src/app/scorecard.fixture.json' with { type: 'json' };
+const fixturePath = fileURLToPath(new URL('../src/app/scorecard.fixture.json', import.meta.url));
+const fixture = JSON.parse(readFileSync(fixturePath, 'utf8'));
 
-const apiMetadata = fixture.apiMetadata as unknown as ApiMetadata;
-const summary = fixture.summary as unknown as Summary;
-const detailGroup = fixture.details[0] as unknown as DetailGroup;
+const apiMetadata = fixture.apiMetadata as ApiMetadata;
+const summary = fixture.summary as Summary;
+const detailGroup = fixture.details[0] as DetailGroup;
 const dimension = detailGroup.dimensions[0] as Dimension;
-const diagnostics = fixture.diagnostics as unknown as Diagnostic[];
+const diagnostics = fixture.diagnostics as Diagnostic[];
 
 describe('component SSR smoke tests', function () {
   it('SummaryCard renders API name and score', function () {
