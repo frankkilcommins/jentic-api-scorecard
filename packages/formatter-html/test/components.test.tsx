@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import type { ApiMetadata, Diagnostic, Dimension, Summary } from '../src/app/types.ts';
+import type { ApiMetadata, DetailGroup, Diagnostic, Dimension, Summary } from '../src/app/types.ts';
 import ApiMetadataCard from '../src/app/components/ApiMetadataCard.tsx';
 import CircularProgress from '../src/app/components/CircularProgress.tsx';
 import DimensionCard from '../src/app/components/DimensionCard.tsx';
@@ -14,7 +14,8 @@ import fixture from '../src/app/scorecard.fixture.json' with { type: 'json' };
 
 const apiMetadata = fixture.apiMetadata as unknown as ApiMetadata;
 const summary = fixture.summary as unknown as Summary;
-const dimension = fixture.details[0] as unknown as Dimension;
+const detailGroup = fixture.details[0] as unknown as DetailGroup;
+const dimension = detailGroup.dimensions[0] as Dimension;
 const diagnostics = fixture.diagnostics as unknown as Diagnostic[];
 
 describe('component SSR smoke tests', function () {
@@ -38,14 +39,18 @@ describe('component SSR smoke tests', function () {
 
   it('DimensionCard renders dimension name and grade', function () {
     const html = renderToStaticMarkup(createElement(DimensionCard, { dimension }));
-    // renderToStaticMarkup escapes & to &amp; — assert on the encoded form
-    expect(html).to.include('Foundational');
+    expect(html).to.include(dimension.name);
     expect(html).to.include(dimension.grade);
   });
 
   it('DiagnosticsSection renders diagnostics count', function () {
     const html = renderToStaticMarkup(createElement(DiagnosticsSection, { diagnostics }));
     expect(html).to.include('136 total');
+  });
+
+  it('DiagnosticsSection renders empty state when no diagnostics', function () {
+    const html = renderToStaticMarkup(createElement(DiagnosticsSection, {}));
+    expect(html).to.include('No diagnostics found');
   });
 
   it('CircularProgress renders score label', function () {
