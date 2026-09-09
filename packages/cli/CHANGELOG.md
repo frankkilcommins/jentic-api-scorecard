@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.11.0](https://github.com/jentic/jentic-api-scorecard/compare/v1.10.1...v1.11.0) (2026-09-09)
+
+### Bug Fixes
+
+- **cli:** fall back to input path when api name is empty string ([4f31dfe](https://github.com/jentic/jentic-api-scorecard/commit/4f31dfe4f2b60e484f4b7d09d408319d11fafb3c))
+- **cli:** use api name in convert pretty output ([2953e39](https://github.com/jentic/jentic-api-scorecard/commit/2953e396525a9674415ccf9bd10c6ca53b291fe5)), closes [#253](https://github.com/jentic/jentic-api-scorecard/issues/253)
+
+### Features
+
+- **cli:** add convert command ([be847aa](https://github.com/jentic/jentic-api-scorecard/commit/be847aa8fdb3a16d0bdb7c7a5747dff06525ef37)), closes [#222](https://github.com/jentic/jentic-api-scorecard/issues/222)
+
 ## [1.10.1](https://github.com/jentic/jentic-api-scorecard/compare/v1.10.0...v1.10.1) (2026-07-21)
 
 **Note:** Version bump only for package @jentic/api-scorecard-cli
