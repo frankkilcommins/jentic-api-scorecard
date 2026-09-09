@@ -371,7 +371,7 @@ prop that defaults to `diagnostics` (backward-compatible, renders everything pre
 `summary | dimensions | signals | diagnostics` to progressively restrict output. `DetailLevel` is
 added to `packages/formatter-html/src/app/` and re-exported from the `./react` entry. Refs #341.
 
-## Phase 25 — Export SummaryCard and DimensionCard from `./react` Entry ✅
+## Phase 25 — Export Building-Block Components from `./react` Entry ✅
 
 **Goal:** Export building-block components from the `./react` entry so consumers can compose custom layouts without re-implementing rendering.
 **Depends on:** none (self-contained — builds on Phase 14's `./react` entry and Phase 24's detail prop, both already shipped)
