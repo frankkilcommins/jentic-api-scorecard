@@ -219,19 +219,19 @@ The HTML formatter is scaffolded in `packages/formatter-html/` after Phase 2 but
 - Lift `"private": true` from `packages/formatter-html/package.json` so the package starts publishing on the same alpha cuts as the CLI.
 - Snapshot-test the formatter against a representative result JSON.
 
-## Phase 15 — Runner becomes a long-lived HTTP server; CLI talks to it via `--api-url`
+## Phase 15 — Runner gains a long-lived HTTP server mode; CLI talks to it via `--api-url`
 
-**Goal:** convert the runner from a one-shot process into a long-lived HTTP server. The CLI auto-manages a local container in local mode and bypasses Docker in remote mode (`--api-url <url>`), so multiple CLIs can share one deployment.
-**Depends on:** Phase 12 (load-bearing breaking change to the container contract — needs the alpha channel to be the surface where it ships)
+**Goal:** add a long-lived HTTP server mode to the runner **alongside** the existing one-shot `score` path, which keeps working unchanged. The CLI auto-manages a local container in local mode and bypasses Docker in remote mode (`--api-url <url>`), so multiple CLIs can share one deployment.
+**Depends on:** Phase 12 (the alpha/release channel the server mode ships on)
 **Priority:** Medium–High
 
-Today every `npx … score` is a fresh `docker run` — cold engine, cold validator caches, no path to a shared deployment. A long-lived server fixes both, and gives Phase 7 (`--verbose`) the structured progress channel that today's `'inherit'` stdio cannot provide.
+Today every `npx … score` is a fresh `docker run` — cold engine, cold validator caches, no path to a shared deployment. A long-lived server fixes both, and gives Phase 7 (`--verbose`) the structured progress channel that today's `'inherit'` stdio cannot provide. The server is built **in parallel** with the current one-shot runner: the existing `docker run … score` invocation and the in-container `score` CLI stay fully functional after this phase, so nothing that works today regresses. (Removing the one-shot path, if ever desired, is deferred to a separate future phase — that removal would be the breaking change, and is out of scope here. Now that stable 1.0.0 has shipped (Phase 16), keeping this phase additive also avoids a post-1.0 breaking change to the container contract.)
 
-- Container's only entrypoint is the HTTP server; the in-container `score` CLI is removed.
+- Add the HTTP server as a **new, additive** container entrypoint; the existing one-shot `score` CLI and `docker run … score` path remain intact and supported.
 - Local mode: CLI auto-starts and reuses a container; teardown is a user action.
 - Remote mode (`--api-url`): pure HTTP, no Docker on the client.
 - LLM credentials stay server-side (set at container start in local mode, operator-configured in remote mode) — never per-request.
-- Auth is the existing gate (`docker/src/jentic_scorecard_runner/gate.py`), promoted to per-request. Per-key throughput caps and API-level auth on top of the gate are sequenced separately.
+- Auth is the existing gate (`docker/src/jentic_scorecard_runner/gate.py`), promoted to per-request in server mode while the one-shot path keeps its current per-invocation gate. Per-key throughput caps and API-level auth on top of the gate are sequenced separately.
 
 This phase replaces the prior "Later Phases" entry "CLI connecting to remote docker instance with `--api-url` option" — removed in this change.
 
@@ -307,6 +307,69 @@ The Phase 19 action attaches a stopgap `physicalLocation` at `startLine: 1` to e
 - A located diagnostic's SARIF result points at its real `startLine`/`startColumn` in the Security tab, not line 1.
 - A diagnostic whose pointer can't be located keeps a sensible file-level fallback.
 - `$ref`-heavy / multi-file specs do not silently mislocate — either correct, or honestly file-level.
+
+## Phase 21 — Add jentic-api-improve skill and agent ✅
+
+**Goal:** Port the `jentic-api-improve` agent skill and its companion subagent out of the private `jentic-skills-internal` repo into this repository as public Apache-2.0 OSS, distributed and documented the same way the existing `jentic-api-scorecard` skill is.
+**Depends on:** the published `@jentic/api-scorecard-cli` (the skill orchestrates `score --with-llm --detail diagnostics`); the existing `skills/` distribution wiring (Phases that shipped the scorecard skill, plugin marketplace, and tarball packaging)
+**Priority:** Medium–High
+
+Scoring tells a user *what* is wrong with their API's AI-readiness; this skill closes the loop — it runs a baseline score, identifies weak dimensions and `POOR_OPERATION_SEMANTICS` diagnostics, applies non-breaking improvements (adding `summary`/`description`/`example`/`tags`, never changing existing contracts), and emits an improved spec, an OpenAPI Overlay 1.1.0 (the reusable delta), and a before/after changelog. It is the second public consumer of the scorecard CLI and the public counterpart to `jentic-apitools verify-improvement` and the Overlay format. The port is a wiring-and-documentation exercise: the skill is markdown-only and orchestrates already-shipped, user-installed tooling. Feature spec: `specs/2026-06-30-jentic-api-improve-skill/`.
+
+- Land the skill at `skills/jentic-api-improve/` (SKILL.md + six `references/` files) and the companion subagent at a new repo-root `agents/jentic-api-improve.md`, copied verbatim (all source frontmatter preserved).
+- Ship the agent via the Claude Code plugin **and** the npm tarball; degrade to the skill's inline-brief subagent fallback where the agent is not installed (Vercel `skills` CLI and TanStack Intent are skill-only).
+- Add a **separate** `api-improve` plugin entry to `.claude-plugin/marketplace.json` (own `skills[]` + `agents[]`), leaving the existing `api-scorecard` plugin untouched.
+- Package the new repo-root `agents/` tree into the CLI tarball with the same `files` + `prepack`/`postpack` mechanism as `skills/`; the second skill needs no `files` change (the `skills/` glob already covers it).
+- Document the skill in a **new dedicated README section** and a **new `docs/publish-config.json` page** (`api-improve-skill` → `docs/cli/api-improve-skill.md`).
+- Update `docs/architecture.md` §4 (layout tree + distribution notes: two plugins, the `agents/` directory, tarball packaging) and `.claude/CLAUDE.md` (both skills, two plugin entries, the `agents/` directory) in lockstep.
+- The new skill must pass the automated SkillSpector `SAFE` gate (`skill-security.yml` globs `skills/*`, so it is scanned with no workflow edit).
+
+## Phase 22 — Benchmark jentic-api-improve Token Usage and Cost ✅
+
+**Goal:** Produce a reproducible benchmark that measures the jentic-api-improve skill's token usage and cost across LLM models and input scenarios, and publish the results as a doc.
+**Depends on:** none (self-contained — measures the already-shipped Phase 21 improve skill)
+**Priority:** Medium–High
+
+Phase 21 shipped the `jentic-api-improve` skill; running it with `--with-llm` incurs LLM cost on two surfaces — the scoring engine's semantic analysis and the coding agent's own reasoning across the skill's standard 2-iteration loop. This phase measures both across a model × input-spec matrix so users can choose a model and anticipate cost before adopting the skill.
+
+- Add a benchmark harness script under `scripts/` (Node ESM, matching `extract-docs.js`) that drives the `jentic-api-improve` skill end-to-end through its standard 2-iteration loop over a matrix of models × input specs.
+- Model axis: run the skill's coding agent under each of Claude haiku, sonnet, opus, and fable, holding the engine `--with-llm` provider fixed so the agent-model comparison isn't confounded.
+- Input axis: a small pinned set of OpenAPI specs pulled from `jentic-public-apis` (which already carry a JAIRF score), chosen to span size/complexity and starting quality (low / mid / high baseline score); record each spec's source URL and baseline score.
+- Agent-reasoning signal: capture the coding agent's own token usage and cost per matrix cell from Claude Code headless mode (`claude -p … --output-format json`), reading the session `usage` and `total_cost_usd` fields — first-party accounting, no estimation.
+- Engine `--with-llm` signal: count the scoring engine's LLM spend across the baseline plus in-loop re-scores by pointing the engine at a token-counting OpenAI-compatible endpoint (the skill's documented local-provider path); confirm during spec whether the scorecard output already surfaces usage that could be read directly instead.
+- Emit machine-readable per-cell results (input/output tokens split by surface, cost, iterations run, score before/after) to a data file that the doc is generated from.
+- Write `docs/improve-cost-benchmark.md`: a results table across models × specs with token and cost totals broken down by surface (engine vs agent), plus model-selection guidance and takeaways.
+- Pin the CLI/image version and stamp the run date in the doc; treat the benchmark as a manual, non-CI-gated measurement since it consumes real scorecard quota and real LLM spend, and LLM outputs are stochastic.
+
+## Phase 23 — jentic-api-improve Change-Scope Modes ✅
+
+**Goal:** Add a change-scope mode switch to the `jentic-api-improve` skill offering `summary-description`, `non-breaking` (default), and `full` modes, with `oasdiff`-based breaking-change detection in every mode.
+**Depends on:** none (self-contained — refines the already-shipped Phase 21 improve skill)
+**Priority:** Medium–High
+
+- Update the skill and the agent to accept a `mode` argument and/or a related prompt instruction with options `non-breaking` (default), `summary-description`, `full`.
+- In `summary-description` mode only apply the summary/descriptions proposed updates coming from diagnostics within the scorecard invoked with llm. Fails if llm is not available in score CLI.
+- In `non-breaking` have it work as with the current logic (add break-detections as described below).
+- In `full` have it perform by default more iterations and be more aggressive in terms of updates, also allowing breaking changes.
+- Add a break detection validation in all modes, using https://github.com/oasdiff/oasdiff. Report the result in all modes, fail if a break is detected in `non-breaking` or `summary-description` modes.
+- Update/add files in `references/` accordingly if needed.
+- Update README section + `docs/architecture.md` / `.claude/CLAUDE.md` + any documentation.
+- The SkillSpector needs to keep passing.
+
+## Phase 24 — Add `detail` prop to `<Scorecard>` React component ✅
+
+**Goal:** expose a `detail` prop on the `<Scorecard>` component in
+`@jentic/api-scorecard-formatter-html/react` that controls rendering depth
+(`summary` / `dimensions` / `signals` / `diagnostics`), mirroring the CLI's `--detail` flag.
+**Depends on:** Phase 14 (the `./react` entry that ships the `Scorecard` component)
+**Priority:** Medium–High
+
+Consumers embedding the scorecard in their own React app currently have no typed way to restrict
+what the component renders — the only option is to strip keys from the `data` prop before
+passing it, a documented phase-1 workaround. This phase formalises the contract: a typed `detail`
+prop that defaults to `diagnostics` (backward-compatible, renders everything present) and accepts
+`summary | dimensions | signals | diagnostics` to progressively restrict output. `DetailLevel` is
+added to `packages/formatter-html/src/app/` and re-exported from the `./react` entry. Refs #341.
 
 ## Later Phases (Not Yet Planned)
 

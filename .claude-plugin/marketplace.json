@@ -12,6 +12,14 @@
       "source": "./",
       "strict": false,
       "skills": ["./skills/jentic-api-scorecard"]
+    },
+    {
+      "name": "api-improve",
+      "description": "Teaches coding agents to raise an OpenAPI document's JAIRF score, producing an improved spec and a reusable OpenAPI Overlay. Improvements are non-breaking by default, with summary-description and full (breaking-allowed) modes and an oasdiff breaking-change check.",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/jentic-api-improve"],
+      "agents": ["./agents/jentic-api-improve.md"]
     }
   ]
 }

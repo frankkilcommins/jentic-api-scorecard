@@ -1,6 +1,6 @@
 {
   "name": "@jentic/api-scorecard-cli",
-  "version": "1.9.1",
+  "version": "1.10.1",
   "description": "Score an OpenAPI document against the Jentic API AI Readiness Framework (JAIRF).",
   "keywords": [
     "api",
@@ -50,6 +50,7 @@
     "dist/",
     "skills/",
     "!skills/_artifacts",
+    "agents/",
     "LICENSE",
     "NOTICE",
     "README.md"
@@ -58,8 +59,8 @@
     "build": "npm run build:typescript",
     "build:typescript": "tsc -p tsconfig.json",
     "clean": "rimraf dist *.tsbuildinfo",
-    "prepack": "copyfiles -u 2 ../../LICENSE . && copyfiles -u 2 ../../NOTICE . && copyfiles -u 2 ../../README.md . && copyfiles -u 2 \"../../skills/**/*\" .",
-    "postpack": "rimraf NOTICE LICENSE README.md skills",
+    "prepack": "copyfiles -u 2 ../../LICENSE . && copyfiles -u 2 ../../NOTICE . && copyfiles -u 2 ../../README.md . && copyfiles -u 2 \"../../skills/**/*\" . && copyfiles -u 2 \"../../agents/**/*\" .",
+    "postpack": "rimraf NOTICE LICENSE README.md skills agents",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
     "test": "mocha",
@@ -67,16 +68,16 @@
     "typescript:check-types": "tsc --noEmit && tsc --noEmit -p test/tsconfig.json"
   },
   "dependencies": {
-    "@jentic/api-scorecard-formatter-html": "1.9.1",
-    "@redocly/openapi-core": "^2.34.0",
+    "@jentic/api-scorecard-formatter-html": "1.10.1",
+    "@redocly/openapi-core": "^2.37.0",
     "chalk": "^5.6.2",
     "commander": "^14.0.0",
-    "ora": "^9.4.0",
+    "ora": "^9.4.1",
     "strip-ansi": "^7.2.0"
   },
   "devDependencies": {
     "@speclynx/apidom-json-pointer": "^4.11.1",
-    "@speclynx/apidom-reference": "^4.11.1",
+    "@speclynx/apidom-reference": "^4.16.0",
     "ajv": "^8.20.0"
   },
   "engines": {
