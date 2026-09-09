@@ -59,6 +59,27 @@ describe('runConvert', function () {
       expect(parsed.summary.score).to.equal(JSON.parse(fixtureRaw).summary.score);
     });
 
+    it('uses the api name as the pretty source label', async function () {
+      const { exitCode, output } = await captureStream(process.stdout, () =>
+        runConvert(fixturePath, {}),
+      );
+      expect(exitCode).to.equal(ExitCode.SUCCESS);
+      expect(output).to.include('Sample API');
+      expect(output).to.not.include(fixturePath);
+    });
+
+    it('falls back to the file path when api name is empty', async function () {
+      const fixture = JSON.parse(fixtureRaw);
+      fixture.apiMetadata.name = '';
+      const emptyNamePath = join(tmpDir, 'empty-name.json');
+      writeFileSync(emptyNamePath, JSON.stringify(fixture));
+      const { exitCode, output } = await captureStream(process.stdout, () =>
+        runConvert(emptyNamePath, {}),
+      );
+      expect(exitCode).to.equal(ExitCode.SUCCESS);
+      expect(output).to.include(emptyNamePath);
+    });
+
     it('writes to -o instead of stdout', async function () {
       const outPath = join(tmpDir, 'out.json');
       const { exitCode, output } = await captureStream(process.stdout, () =>
