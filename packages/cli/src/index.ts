@@ -1,10 +1,11 @@
 import { Command, Option } from 'commander';
 
+import { runConvert } from './commands/convert.ts';
 import { runScore } from './commands/score.ts';
 import { DEFAULT_DETAIL, DETAIL_LEVELS, DetailLevel } from './detail.ts';
 import { ExitCode } from './exit-codes.ts';
 import { DEFAULT_FORMAT, FORMATS, Format } from './format.ts';
-import { validateScoreOptions } from './validate.ts';
+import { validateFormatOptions } from './validate.ts';
 import { cliVersion } from './version.ts';
 
 export async function main(argv: string[] = process.argv): Promise<void> {
@@ -18,7 +19,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
   program
     .command('score')
     .description('Score an OpenAPI document by URL or local file path.')
-    .argument('<input>', 'https:// URL or local file path to an OpenAPI document')
+    .argument('<input>', 'http(s):// URL or local file path to an OpenAPI document')
     .option('--with-llm', 'Enable LLM-backed analysis in the engine', false)
     .option(
       '--bundle',
@@ -58,7 +59,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
         },
         command: Command,
       ) => {
-        const verdict = validateScoreOptions(
+        const verdict = validateFormatOptions(
           {
             format: opts.format,
             output: opts.output,
@@ -85,6 +86,57 @@ export async function main(argv: string[] = process.argv): Promise<void> {
           format: opts.format,
           output: opts.output,
           quiet: opts.quiet,
+        });
+        process.exitCode = exitCode;
+      },
+    );
+
+  program
+    .command('convert')
+    .description('Reformat a saved scorecard JSON file without re-scoring.')
+    .argument('<input>', 'http(s):// URL or local file path to a scorecard JSON file')
+    .addOption(
+      new Option('-d, --detail <level>', 'Payload depth (applied on top of the saved level)')
+        .choices([...DETAIL_LEVELS])
+        .default(DEFAULT_DETAIL),
+    )
+    .addOption(
+      new Option('-f, --format <fmt>', 'Output encoding')
+        .choices([...FORMATS])
+        .default(DEFAULT_FORMAT),
+    )
+    .option('-o, --output <file>', 'Write the formatted report to <file> instead of stdout')
+    .action(
+      async (
+        input: string,
+        opts: {
+          detail: DetailLevel;
+          format: Format;
+          output?: string;
+        },
+        command: Command,
+      ) => {
+        const verdict = validateFormatOptions(
+          {
+            format: opts.format,
+            output: opts.output,
+            detail: opts.detail,
+            detailIsExplicit: command.getOptionValueSource('detail') === 'cli',
+          },
+          process.stdout.isTTY === true,
+        );
+        if (verdict.error !== null) {
+          process.stderr.write(`error: ${verdict.error}\n`);
+          process.exitCode = ExitCode.GENERIC_ERROR;
+          return;
+        }
+        if (verdict.warning !== null) {
+          process.stderr.write(`warning: ${verdict.warning}\n`);
+        }
+        const exitCode = await runConvert(input, {
+          detail: opts.detail,
+          format: opts.format,
+          output: opts.output,
         });
         process.exitCode = exitCode;
       },

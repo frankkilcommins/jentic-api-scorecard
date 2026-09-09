@@ -1,7 +1,7 @@
 import { DetailLevel } from './detail.ts';
 import { Format } from './format.ts';
 
-export interface ScoreOptionsToValidate {
+export interface FormatOptionsToValidate {
   format: Format;
   output?: string;
   detail?: DetailLevel;
@@ -10,7 +10,7 @@ export interface ScoreOptionsToValidate {
   detailIsExplicit?: boolean;
 }
 
-export interface ScoreOptionsVerdict {
+export interface FormatOptionsVerdict {
   // A fatal message: the caller prints it and exits non-zero.
   error: string | null;
   // A non-fatal advisory: the caller prints it and proceeds.
@@ -20,10 +20,10 @@ export interface ScoreOptionsVerdict {
 // Pure validation of cross-option constraints that Commander can't express on its
 // own (a choice is only invalid in combination with another flag + the runtime).
 // `stdoutIsTty` is injected rather than read from process so this stays unit-testable.
-export function validateScoreOptions(
-  options: ScoreOptionsToValidate,
+export function validateFormatOptions(
+  options: FormatOptionsToValidate,
   stdoutIsTty: boolean,
-): ScoreOptionsVerdict {
+): FormatOptionsVerdict {
   // HTML is a full document, not terminal-friendly. Refuse to dump it into an
   // interactive terminal; require either -o <file> or a redirected stdout. SARIF,
   // json, and markdown are plain text and stay printable to a TTY.
