@@ -1,6 +1,6 @@
 import type { ApiMetadata } from '../types.ts';
 
-export interface ApiMetadataCardProps {
+interface ApiMetadataCardProps {
   apiMetadata: ApiMetadata;
 }
 

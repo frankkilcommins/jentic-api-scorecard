@@ -19,7 +19,7 @@ function formatEngineLine(version: string | undefined): string | null {
   return parts.join(' | ');
 }
 
-export interface SummaryCardProps {
+interface SummaryCardProps {
   apiMetadata: ApiMetadata;
   summary: Summary;
   metadata?: EngineMetadata;
