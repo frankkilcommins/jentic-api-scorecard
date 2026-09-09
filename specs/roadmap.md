@@ -371,17 +371,17 @@ prop that defaults to `diagnostics` (backward-compatible, renders everything pre
 `summary | dimensions | signals | diagnostics` to progressively restrict output. `DetailLevel` is
 added to `packages/formatter-html/src/app/` and re-exported from the `./react` entry. Refs #341.
 
-## Phase 25 — Export SummaryCard and DimensionCard from `./react` Entry
+## Phase 25 — Export Building-Block Components from `./react` Entry ✅
 
-**Goal:** Export `SummaryCard`, `DimensionCard`, and their prop interfaces from the `./react` entry so consumers can compose custom layouts without re-implementing rendering.
+**Goal:** Export building-block components from the `./react` entry so consumers can compose custom layouts without re-implementing rendering.
 **Depends on:** none (self-contained — builds on Phase 14's `./react` entry and Phase 24's detail prop, both already shipped)
 **Priority:** Medium–High
 
-- Export `SummaryCard`, `DimensionCard`, and their prop interfaces (`SummaryCardProps`, `DimensionCardProps`) from `packages/formatter-html/src/app/react.ts`.
-- Confirm both components are included in the transpiled `dist/react/` output (verify `tsconfig.react.json` covers the new exports; no changes expected but must be checked).
-- Add SSR smoke tests in `packages/formatter-html/test/` confirming `SummaryCard` and `DimensionCard` render without crashing when consumed as direct imports with minimal props.
-- Keep all components below `SummaryCard`/`DimensionCard` (`SignalCard`, `CircularProgress`, `GradeBadge`, individual metadata panels, etc.) unexported — concrete consumer demand is the gate for future additions.
-- Update `README.md` and `.claude/CLAUDE.md` to document the expanded `./react` public surface.
+- Extract the stats bar from `SummaryCard` into a new `ApiMetadataCard` component; add `showApiMetadata?: boolean` (default `true`) to `SummaryCard` to conditionally render it.
+- Export `SummaryCard`, `DimensionCard`, `DiagnosticsSection`, `CircularProgress`, `GradeBadge`, and `ApiMetadataCard` from `packages/formatter-html/src/app/react.ts`. Prop interfaces stay private (consistent with the existing `Scorecard` convention — consumers use `React.ComponentProps<typeof X>` if needed).
+- Confirm all components are included in the transpiled `dist/react/` output (`tsconfig.react.json` required no changes).
+- Add render smoke tests in `packages/formatter-html/test/components.test.tsx` importing from the public `react.ts` entry, covering all six exported components including the `showApiMetadata` toggle.
+- Update `.claude/CLAUDE.md` to document the expanded `./react` public surface.
 
 ## Later Phases (Not Yet Planned)
 

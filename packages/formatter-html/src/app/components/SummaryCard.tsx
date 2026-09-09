@@ -1,5 +1,6 @@
 import type { ApiMetadata, EngineMetadata, Summary } from '../types.ts';
 
+import ApiMetadataCard from './ApiMetadataCard.tsx';
 import CircularProgress from './CircularProgress.tsx';
 import { getGradeColor } from './scoreColors.ts';
 
@@ -22,9 +23,15 @@ interface SummaryCardProps {
   apiMetadata: ApiMetadata;
   summary: Summary;
   metadata?: EngineMetadata;
+  showApiMetadata?: boolean;
 }
 
-export default function SummaryCard({ apiMetadata, summary, metadata }: SummaryCardProps) {
+export default function SummaryCard({
+  apiMetadata,
+  summary,
+  metadata,
+  showApiMetadata = true,
+}: SummaryCardProps) {
   const engineLine = formatEngineLine(metadata?.engine?.version);
 
   return (
@@ -81,14 +88,8 @@ export default function SummaryCard({ apiMetadata, summary, metadata }: SummaryC
           </div>
         )}
 
-        {/* Stats bar - horizontal */}
-        <div className="flex items-stretch gap-3 pt-6 border-t border-gray-200">
-          <StatItem label="OPERATIONS" value={apiMetadata.operationCount} />
-          <StatItem label="SCHEMAS" value={apiMetadata.schemaCount} />
-          <StatItem label="TAGS" value={apiMetadata.tagCount} />
-          <StatItem label="SECURITY SCHEMES" value={apiMetadata.securitySchemeCount} />
-          <StatItem label="SECURITY TYPES" value={apiMetadata.securitySchemeTypes?.length || 0} />
-        </div>
+        {/* Stats bar — rendered via ApiMetadataCard; hidden when showApiMetadata is false */}
+        {showApiMetadata && <ApiMetadataCard apiMetadata={apiMetadata} />}
       </div>
 
       {/* Footer */}
@@ -105,22 +106,6 @@ export default function SummaryCard({ apiMetadata, summary, metadata }: SummaryC
           </a>
         </span>
         {engineLine && <span>{engineLine}</span>}
-      </div>
-    </div>
-  );
-}
-
-interface StatItemProps {
-  label: string;
-  value: number;
-}
-
-function StatItem({ label, value }: StatItemProps) {
-  return (
-    <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 min-w-0">
-      <div className="min-w-0">
-        <div className="text-[10px] text-gray-500 uppercase tracking-wide truncate">{label}</div>
-        <div className="text-lg font-bold text-gray-900">{value}</div>
       </div>
     </div>
   );
