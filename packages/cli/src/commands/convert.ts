@@ -103,7 +103,7 @@ export async function runConvert(input: string, options: ConvertOptions): Promis
           ? formatMarkdown(filtered, { detail })
           : format === Format.SARIF
             ? formatSarif(parsed)
-            : formatPretty(filtered, input, { detail });
+            : formatPretty(filtered, filtered.apiMetadata?.name || input, { detail });
 
   if (options.output !== undefined) {
     try {
