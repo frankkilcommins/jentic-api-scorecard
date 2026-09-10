@@ -51,7 +51,7 @@ to your `<head>` or configure Tailwind in your build tool:
 
 ### Getting scorecard data
 
-All components accept a `ScorecardData` object. The easiest way to get one is from the CLI:
+These components render data sourced from a `ScorecardData` object. The easiest way to get one is from the CLI:
 
 ```sh
 npx @jentic/api-scorecard-cli score your-api.yaml \
@@ -85,9 +85,9 @@ The `detail` prop controls how much information is shown:
 | `detail` | What renders |
 |---|---|
 | `"summary"` | Score + grade only |
-| `"dimensions"` | Adds dimension cards (default) |
+| `"dimensions"` | Adds dimension cards |
 | `"signals"` | Adds diagnostic evidence inside signal cards |
-| `"diagnostics"` | Adds full diagnostics section at the bottom |
+| `"diagnostics"` | Adds full diagnostics section at the bottom (default) |
 
 ### Building-block components
 
@@ -157,14 +157,14 @@ Circular score dial. Useful as a standalone score indicator anywhere in a page.
 ```tsx
 import { CircularProgress } from '@jentic/api-scorecard-formatter-html/react';
 
-<CircularProgress score={scorecard.summary.score} size={90} strokeWidth={7} />
+<CircularProgress score={scorecard.summary.score} />
 ```
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
 | `score` | `number` | — | 0–100 |
-| `size` | `number` | `90` | Diameter in px |
-| `strokeWidth` | `number` | `7` | Ring thickness in px |
+| `size` | `number` | `80` | Diameter in px |
+| `strokeWidth` | `number` | `6` | Ring thickness in px |
 | `labelSize` | `string` | `"text-2xl"` | Tailwind text-size class for the score label |
 
 #### `GradeBadge`
