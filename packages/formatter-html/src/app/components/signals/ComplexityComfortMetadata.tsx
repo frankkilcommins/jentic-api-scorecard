@@ -81,7 +81,7 @@ export default function ComplexityComfortMetadata({
 
   return (
     <div
-      className="mt-3 pt-3 border-t border-gray-100 cursor-default space-y-2"
+      className="mt-3 pt-3 border-t border-[var(--sc-border)] cursor-default space-y-2"
       onClick={(e) => e.stopPropagation()}
     >
       {metrics.length > 0 ? (
@@ -90,7 +90,7 @@ export default function ComplexityComfortMetadata({
           <MetricGrid metrics={metrics} />
         </>
       ) : (
-        <p className="text-gray-500 text-xs italic text-center py-2">
+        <p className="text-[var(--sc-text-muted)] text-xs italic text-center py-2">
           No complexity metrics available
         </p>
       )}
