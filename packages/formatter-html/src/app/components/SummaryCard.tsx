@@ -35,17 +35,17 @@ export default function SummaryCard({
   const engineLine = formatEngineLine(metadata?.engine?.version);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+    <div className="bg-[var(--sc-bg)] rounded-lg shadow-lg border border-[var(--sc-border)] overflow-hidden">
       {/* Main content */}
       <div className="p-6">
         {/* Title row */}
         <div className="flex items-start justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold text-sm">
+            <div className="w-10 h-10 bg-[var(--sc-section)] rounded-full flex items-center justify-center text-[var(--sc-text-secondary)] font-bold text-sm">
               {apiMetadata.name.charAt(0).toUpperCase()}
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">{apiMetadata.name}</h1>
-            <span className="text-gray-500 text-lg">
+            <h1 className="text-2xl font-bold text-[var(--sc-text-primary)]">{apiMetadata.name}</h1>
+            <span className="text-[var(--sc-text-secondary)] text-lg">
               - {summary.level.charAt(0).toUpperCase() + summary.level.slice(1)}{' '}
               <span className="font-semibold" style={{ color: getGradeColor(summary.grade) }}>
                 ({summary.grade})
@@ -80,7 +80,7 @@ export default function SummaryCard({
                   strokeWidth={7}
                   labelSize="text-2xl"
                 />
-                <span className="mt-3 text-xs text-gray-600 leading-tight max-w-[100px]">
+                <span className="mt-3 text-xs text-[var(--sc-text-secondary)] leading-tight max-w-[100px]">
                   {dim.name}
                 </span>
               </div>
@@ -93,7 +93,7 @@ export default function SummaryCard({
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3 bg-gray-50 flex items-center justify-between text-xs text-gray-500 border-t border-gray-200">
+      <div className="px-6 py-3 bg-[var(--sc-section)] flex items-center justify-between text-xs text-[var(--sc-text-muted)] border-t border-[var(--sc-border)]">
         <span>
           Powered by{' '}
           <a

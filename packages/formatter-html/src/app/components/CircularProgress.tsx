@@ -29,7 +29,7 @@ export default function CircularProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
+          stroke="var(--cp-track)"
           strokeWidth={strokeWidth}
         />
         {/* Progress circle */}
