@@ -383,7 +383,7 @@ added to `packages/formatter-html/src/app/` and re-exported from the `./react` e
 - Add render smoke tests in `packages/formatter-html/test/components.test.tsx` importing from the public `react.ts` entry, covering all six exported components including the `showApiMetadata` toggle.
 - Update `.claude/CLAUDE.md` to document the expanded `./react` public surface.
 
-## Phase 26 — Dark Mode Support for Formatter HTML
+## Phase 26 — Dark Mode Support for Formatter HTML ✅
 
 **Goal:** Add `dark:` Tailwind variants to all `./react` components and a system-preference-following dark mode with manual toggle to the standalone HTML, without changing the `format()` signature.
 **Depends on:** none (self-contained)

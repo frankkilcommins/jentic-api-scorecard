@@ -31,6 +31,10 @@ npx @jentic/api-scorecard-cli score your-api.yaml \
   --format json --detail diagnostics -o scorecard.json
 ```
 
+The output includes an auto-dark mode script: it reads the `prefers-color-scheme` media query
+on load and adds a fixed-position sun/moon toggle button (`#dark-mode-toggle`) to the page.
+The user's manual preference is persisted in `localStorage` under `jentic-scorecard-dark`.
+
 ---
 
 ## React components — `./react`
@@ -175,6 +179,39 @@ Coloured grade pill (`A+` through `F`).
 import { GradeBadge } from '@jentic/api-scorecard-formatter-html/react';
 
 <GradeBadge grade={scorecard.summary.grade} />
+```
+
+### Dark mode
+
+All components follow a **`class="dark"` parent strategy**: add `dark` to any ancestor element
+and the components switch to the Jentic dark palette automatically. No prop is needed.
+
+```tsx
+<div className="dark">
+  <SummaryCard apiMetadata={scorecard.apiMetadata} summary={scorecard.summary} />
+</div>
+```
+
+Surface colours are expressed as CSS custom properties. Define these on the parent that carries
+`class="dark"` (or on `:root` / `.dark` in your stylesheet):
+
+| Variable | Light default | Dark (Jentic palette) |
+|---|---|---|
+| `--sc-bg` | `#ffffff` | `#0E1A1D` |
+| `--sc-card` | `#f9fafb` | `#162629` |
+| `--sc-section` | `#f3f4f6` | `#193238` |
+| `--sc-text-primary` | `#111827` | `#FFFFFF` |
+| `--sc-text-secondary` | `#6b7280` | `#E4EAEB` |
+| `--sc-text-muted` | `#9ca3af` | `#A3CACC` |
+| `--sc-border` | `#e5e7eb` | `#305256` |
+| `--cp-track` | `#e5e7eb` | `#305256` |
+
+The Tailwind Play CDN applies dark variants via a media query by default. To use the
+`class="dark"` strategy instead, configure Tailwind's `darkMode` option:
+
+```js
+// tailwind.config.js
+module.exports = { darkMode: 'class' };
 ```
 
 ### TypeScript types

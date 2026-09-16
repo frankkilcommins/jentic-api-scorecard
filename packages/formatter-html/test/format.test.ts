@@ -46,7 +46,7 @@ describe('injectScorecard', function () {
   });
 
   it('preserves unicode line separators through round-trip', function () {
-    const result: ScorecardResult = { note: 'line and para' };
+    const result: ScorecardResult = { note: 'line\u2028and\u2029para' };
     expect(readInjected(injectScorecard(TEMPLATE, result))).to.deep.equal(result);
   });
 
@@ -82,5 +82,14 @@ describe('format (built template)', function () {
     const externalHref = html.match(/<link[^>]+href="(?!data:)[^"]+"/i);
     expect(externalSrc, 'no external <script src>').to.equal(null);
     expect(externalHref, 'no external <link href>').to.equal(null);
+  });
+
+  it('includes dark mode bootstrap script and toggle button', async function () {
+    if (!built) this.skip();
+    const { format } = (await import(DIST)) as { format: (r: ScorecardResult) => string };
+    const html = format({ apiMetadata: { name: 'X' }, summary: { score: 1 }, details: [] });
+    expect(html).to.contain('prefers-color-scheme');
+    expect(html).to.contain("'dark-mode-toggle'");
+    expect(html).to.contain('--sc-bg');
   });
 });
