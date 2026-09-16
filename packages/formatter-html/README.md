@@ -205,9 +205,25 @@ Surface colours are expressed as CSS custom properties. Define these on the pare
 | `--sc-text-muted` | `#9ca3af` | `#A3CACC` |
 | `--sc-border` | `#e5e7eb` | `#305256` |
 | `--cp-track` | `#e5e7eb` | `#305256` |
+| `--score-color-a` | `hsl(142,71%,45%)` | `hsl(142,60%,55%)` |
+| `--score-color-b` | `hsl(165,82%,35%)` | `hsl(165,70%,45%)` |
+| `--score-color-c` | `hsl(45,93%,47%)` | `hsl(45,90%,60%)` |
+| `--score-color-d` | `hsl(25,95%,53%)` | `hsl(25,90%,62%)` |
+| `--score-color-f` | `hsl(0,84%,60%)` | `hsl(0,75%,65%)` |
 
-The Tailwind Play CDN applies dark variants via a media query by default. To use the
-`class="dark"` strategy instead, configure Tailwind's `darkMode` option:
+The `--score-color-*` variables drive score arcs (`CircularProgress`), grade colors
+(`GradeBadge`), and signal border accents (`DimensionCard`). All thirteen variables are
+required for correctly styled output.
+
+To use the `class="dark"` strategy, configure your Tailwind setup:
+
+**Tailwind v4** — add this to your CSS entry point:
+
+```css
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+**Tailwind v3** — set `darkMode` in your config:
 
 ```js
 // tailwind.config.js

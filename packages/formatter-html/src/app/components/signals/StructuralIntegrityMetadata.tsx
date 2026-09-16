@@ -34,9 +34,11 @@ export default function StructuralIntegrityMetadata({
       onClick={(e) => e.stopPropagation()}
     >
       {structural_issues === 0 ? (
-        <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
-          <Icon name="check-circle" className="h-4 w-4 text-emerald-600" />
-          <span className="text-sm font-medium text-emerald-700">No structural issues</span>
+        <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 dark:border-emerald-800/40 dark:bg-emerald-950/30 px-3 py-2">
+          <Icon name="check-circle" className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+          <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+            No structural issues
+          </span>
         </div>
       ) : (
         <div className="space-y-2">

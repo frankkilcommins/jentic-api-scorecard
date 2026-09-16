@@ -40,16 +40,22 @@ export default function LintResultsMetadata({ metadata, diagnostics }: LintResul
       {severity_counts && (
         <div className="text-xs text-[var(--sc-text-secondary)]">
           <span className="font-medium">{total} issues:</span>{' '}
-          {critical > 0 && <span className="text-red-700">{critical} critical</span>}
+          {critical > 0 && (
+            <span className="text-red-700 dark:text-rose-400">{critical} critical</span>
+          )}
           {critical > 0 && (error > 0 || warning > 0 || info > 0 || hint > 0) && ', '}
-          {error > 0 && <span className="text-red-600">{error} errors</span>}
+          {error > 0 && <span className="text-red-600 dark:text-rose-400">{error} errors</span>}
           {error > 0 && (warning > 0 || info > 0 || hint > 0) && ', '}
-          {warning > 0 && <span className="text-yellow-700">{warning} warnings</span>}
+          {warning > 0 && (
+            <span className="text-yellow-700 dark:text-amber-400">{warning} warnings</span>
+          )}
           {warning > 0 && (info > 0 || hint > 0) && ', '}
-          {info > 0 && <span className="text-blue-600">{info} info</span>}
+          {info > 0 && <span className="text-blue-600 dark:text-sky-400">{info} info</span>}
           {info > 0 && hint > 0 && ', '}
-          {hint > 0 && <span className="text-gray-600">{hint} hints</span>}
-          {total === 0 && <span className="text-green-600">No issues found</span>}
+          {hint > 0 && <span className="text-gray-600 dark:text-slate-400">{hint} hints</span>}
+          {total === 0 && (
+            <span className="text-green-600 dark:text-emerald-400">No issues found</span>
+          )}
         </div>
       )}
 

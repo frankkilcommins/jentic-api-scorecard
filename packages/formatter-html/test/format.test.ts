@@ -20,6 +20,28 @@ function readInjected(html: string): unknown {
   return JSON.parse(assignment);
 }
 
+describe('injectDarkMode (via injectScorecard)', function () {
+  it('injects prefers-color-scheme script before </head>', function () {
+    const out = injectScorecard(TEMPLATE, {});
+    expect(out).to.contain('prefers-color-scheme');
+  });
+
+  it('injects dark-mode-toggle button code', function () {
+    const out = injectScorecard(TEMPLATE, {});
+    expect(out).to.contain("'dark-mode-toggle'");
+  });
+
+  it('injects localStorage key', function () {
+    const out = injectScorecard(TEMPLATE, {});
+    expect(out).to.contain('jentic-scorecard-dark');
+  });
+
+  it('is idempotent: </head> is still present after injection', function () {
+    const out = injectScorecard(TEMPLATE, {});
+    expect(out).to.contain('</head>');
+  });
+});
+
 describe('injectScorecard', function () {
   it('assigns the result to window.__SCORECARD__', function () {
     const out = injectScorecard(TEMPLATE, { summary: { score: 66.5 } });

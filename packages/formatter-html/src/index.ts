@@ -84,7 +84,7 @@ const DARK_MODE_SCRIPT = `<script>
  * change listener and appends a fixed-position sun/moon toggle button to
  * `<body>` on DOMContentLoaded.
  */
-export function injectDarkMode(html: string): string {
+function injectDarkMode(html: string): string {
   return html.replace('</head>', `${DARK_MODE_SCRIPT}</head>`);
 }
 
