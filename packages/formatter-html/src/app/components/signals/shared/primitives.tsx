@@ -19,10 +19,10 @@ export interface MetricRowProps {
 export function MetricRow({ label, value, valueColor, showColon = false }: MetricRowProps) {
   const colorClass = valueColor
     ? getMetricColorClasses(valueColor)
-    : 'text-[var(--sc-text-primary)]';
+    : 'text-[var(--sc-text-primary,#111827)]';
   return (
-    <div className="bg-[var(--sc-section)] flex items-center justify-between rounded px-2 py-1.5 text-xs">
-      <span className="text-[var(--sc-text-muted)]">
+    <div className="bg-[var(--sc-section,#f3f4f6)] flex items-center justify-between rounded px-2 py-1.5 text-xs">
+      <span className="text-[var(--sc-text-muted,#9ca3af)]">
         {label}
         {showColon ? ':' : ''}
       </span>
@@ -43,13 +43,13 @@ export function MetricGrid({ metrics, columns = 2 }: MetricGridProps) {
       {metrics.map((metric) => {
         const colorClass = metric.valueColor
           ? getMetricColorClasses(metric.valueColor)
-          : 'text-[var(--sc-text-primary)]';
+          : 'text-[var(--sc-text-primary,#111827)]';
         return (
           <div
             key={metric.label}
-            className="bg-[var(--sc-section)] flex items-center justify-between rounded px-2 py-1 text-xs"
+            className="bg-[var(--sc-section,#f3f4f6)] flex items-center justify-between rounded px-2 py-1 text-xs"
           >
-            <span className="text-[var(--sc-text-muted)] mr-2 truncate">
+            <span className="text-[var(--sc-text-muted,#9ca3af)] mr-2 truncate">
               {metric.label}
               {metric.showColon ? ':' : ''}
             </span>
@@ -65,7 +65,7 @@ export function MetricGrid({ metrics, columns = 2 }: MetricGridProps) {
 
 export function SectionHeader({ children }: { children: ReactNode }) {
   return (
-    <div className="text-[var(--sc-text-muted)] text-[10px] font-medium uppercase tracking-wide">
+    <div className="text-[var(--sc-text-muted,#9ca3af)] text-[10px] font-medium uppercase tracking-wide">
       {children}
     </div>
   );
@@ -84,7 +84,7 @@ export function ProgressBar({ value, max = 1, className = '', height = 'md' }: P
   const heightClass = height === 'sm' ? 'h-1.5' : 'h-2';
   return (
     <div
-      className={`${heightClass} w-full overflow-hidden rounded-full bg-[var(--sc-section)] ${className}`}
+      className={`${heightClass} w-full overflow-hidden rounded-full bg-[var(--sc-section,#f3f4f6)] ${className}`}
     >
       <div
         className={`h-full rounded-full transition-all duration-500 ${barColor}`}
@@ -120,7 +120,7 @@ export function DonutChart({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-[var(--cp-track)]"
+          className="text-[var(--cp-track,#e5e7eb)]"
         />
         <circle
           cx="50"
@@ -154,7 +154,7 @@ export function SecondaryMetric({ value, label, isBad }: SecondaryMetricProps) {
   const colors =
     isBad && value > 0
       ? getBadgeColorClasses('red')
-      : { bg: 'bg-[var(--sc-section)]', text: 'text-[var(--sc-text-muted)]' };
+      : { bg: 'bg-[var(--sc-section,#f3f4f6)]', text: 'text-[var(--sc-text-muted,#9ca3af)]' };
   return (
     <div
       className={`inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs ${colors.bg} ${colors.text}`}

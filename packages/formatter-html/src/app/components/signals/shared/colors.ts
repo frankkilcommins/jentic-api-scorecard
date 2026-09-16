@@ -18,7 +18,7 @@ export function getMetricColorClasses(color: MetricColor): string {
       return 'text-orange-600 dark:text-orange-400';
     case 'muted':
     default:
-      return 'text-[var(--sc-text-primary)]';
+      return 'text-[var(--sc-text-primary,#111827)]';
   }
 }
 
@@ -69,7 +69,7 @@ export function getColorClassesByType(color: MetricColor): { text: string; bg: s
       return { text: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-500' };
     case 'muted':
     default:
-      return { text: 'text-[var(--sc-text-muted)]', bg: 'bg-[var(--sc-section)]' };
+      return { text: 'text-[var(--sc-text-muted,#9ca3af)]', bg: 'bg-[var(--sc-section,#f3f4f6)]' };
   }
 }
 
@@ -101,7 +101,7 @@ export function getBadgeColorClasses(color: ExtendedColor): { bg: string; text: 
       };
     case 'muted':
     default:
-      return { bg: 'bg-[var(--sc-section)]', text: 'text-[var(--sc-text-muted)]' };
+      return { bg: 'bg-[var(--sc-section,#f3f4f6)]', text: 'text-[var(--sc-text-muted,#9ca3af)]' };
   }
 }
 

@@ -33,3 +33,7 @@
   --score-color-d: hsl(25, 90%, 65%);
   --score-color-f: hsl(0, 80%, 68%);
 }
+
+body {
+  background-color: var(--sc-bg, #ffffff);
+}

@@ -34,11 +34,11 @@ export default function LintResultsMetadata({ metadata, diagnostics }: LintResul
 
   return (
     <div
-      className="mt-3 pt-3 border-t border-[var(--sc-border)] cursor-default space-y-3"
+      className="mt-3 pt-3 border-t border-[var(--sc-border,#e5e7eb)] cursor-default space-y-3"
       onClick={(e) => e.stopPropagation()}
     >
       {severity_counts && (
-        <div className="text-xs text-[var(--sc-text-secondary)]">
+        <div className="text-xs text-[var(--sc-text-secondary,#6b7280)]">
           <span className="font-medium">{total} issues:</span>{' '}
           {critical > 0 && (
             <span className="text-red-700 dark:text-rose-400">{critical} critical</span>
@@ -69,12 +69,12 @@ export default function LintResultsMetadata({ metadata, diagnostics }: LintResul
         max_cost !== undefined &&
         max_cost >= 0 && (
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="bg-[var(--sc-section)] flex items-center justify-between rounded px-2.5 py-2">
-              <span className="text-[var(--sc-text-muted)]">Weighted Cost</span>
+            <div className="bg-[var(--sc-section,#f3f4f6)] flex items-center justify-between rounded px-2.5 py-2">
+              <span className="text-[var(--sc-text-muted,#9ca3af)]">Weighted Cost</span>
               <span className="font-mono font-semibold">{weighted_cost.toFixed(2)}</span>
             </div>
-            <div className="bg-[var(--sc-section)] flex items-center justify-between rounded px-2.5 py-2">
-              <span className="text-[var(--sc-text-muted)]">Max Cost</span>
+            <div className="bg-[var(--sc-section,#f3f4f6)] flex items-center justify-between rounded px-2.5 py-2">
+              <span className="text-[var(--sc-text-muted,#9ca3af)]">Max Cost</span>
               <span className="font-mono font-semibold">{max_cost.toFixed(2)}</span>
             </div>
           </div>

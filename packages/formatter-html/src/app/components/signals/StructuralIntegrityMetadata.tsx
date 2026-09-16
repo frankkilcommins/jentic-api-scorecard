@@ -30,7 +30,7 @@ export default function StructuralIntegrityMetadata({
 
   return (
     <div
-      className="mt-3 pt-3 border-t border-[var(--sc-border)] cursor-default space-y-3"
+      className="mt-3 pt-3 border-t border-[var(--sc-border,#e5e7eb)] cursor-default space-y-3"
       onClick={(e) => e.stopPropagation()}
     >
       {structural_issues === 0 ? (
@@ -43,27 +43,29 @@ export default function StructuralIntegrityMetadata({
       ) : (
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[var(--sc-text-muted)]">Distance to collapse threshold</span>
+            <span className="text-[var(--sc-text-muted,#9ca3af)]">
+              Distance to collapse threshold
+            </span>
             <div className="flex items-center gap-1">
               <span
                 className={`font-mono font-semibold ${getPercentageTextColorClass(percentage)}`}
               >
                 {percentage.toFixed(0)}%
               </span>
-              <span className="text-[var(--sc-text-muted)] text-[10px]">
+              <span className="text-[var(--sc-text-muted,#9ca3af)] text-[10px]">
                 (away from collapse threshold)
               </span>
             </div>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--sc-section)]">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--sc-section,#f3f4f6)]">
             <div
               className={`h-full rounded-full transition-all ${getProgressBarColorClass(percentage)}`}
               style={{ width: `${Math.min(percentage, 100)}%` }}
             />
           </div>
-          <p className="text-[var(--sc-text-muted)] text-xs">
+          <p className="text-[var(--sc-text-muted,#9ca3af)] text-xs">
             Structural issues:{' '}
-            <span className="text-[var(--sc-text-primary)] font-mono font-medium">
+            <span className="text-[var(--sc-text-primary,#111827)] font-mono font-medium">
               {structural_issues}
             </span>{' '}
             / {structural_issue_threshold} (collapse threshold)
@@ -73,16 +75,16 @@ export default function StructuralIntegrityMetadata({
 
       {categories.length > 0 && (
         <div className="space-y-1">
-          <div className="text-[var(--sc-text-muted)] text-[10px] font-medium uppercase tracking-wide">
+          <div className="text-[var(--sc-text-muted,#9ca3af)] text-[10px] font-medium uppercase tracking-wide">
             By Category
           </div>
           <div className="grid grid-cols-2 gap-1">
             {categories.map(([category, count]) => (
               <div
                 key={category}
-                className="bg-[var(--sc-section)] flex items-center justify-between rounded px-2 py-1 text-xs"
+                className="bg-[var(--sc-section,#f3f4f6)] flex items-center justify-between rounded px-2 py-1 text-xs"
               >
-                <span className="text-[var(--sc-text-muted)] truncate capitalize">
+                <span className="text-[var(--sc-text-muted,#9ca3af)] truncate capitalize">
                   {category.replace(/_/g, ' ')}
                 </span>
                 <span className="font-mono font-medium">{count}</span>

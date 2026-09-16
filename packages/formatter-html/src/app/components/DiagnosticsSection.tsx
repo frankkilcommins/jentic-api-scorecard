@@ -56,9 +56,11 @@ export default function DiagnosticsSection({ diagnostics }: DiagnosticsSectionPr
   if (!diagnostics || diagnostics.length === 0) {
     return (
       <div>
-        <h2 className="text-2xl font-bold text-[var(--sc-text-primary)] mb-6">Diagnostics</h2>
-        <div className="bg-[var(--sc-bg)] rounded-lg shadow-sm border border-[var(--sc-border)] p-6">
-          <p className="text-[var(--sc-text-muted)]">No diagnostics found.</p>
+        <h2 className="text-2xl font-bold text-[var(--sc-text-primary,#111827)] mb-6">
+          Diagnostics
+        </h2>
+        <div className="bg-[var(--sc-bg,#ffffff)] rounded-lg shadow-sm border border-[var(--sc-border,#e5e7eb)] p-6">
+          <p className="text-[var(--sc-text-muted,#9ca3af)]">No diagnostics found.</p>
         </div>
       </div>
     );
@@ -84,10 +86,10 @@ export default function DiagnosticsSection({ diagnostics }: DiagnosticsSectionPr
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-[var(--sc-text-primary)]">Diagnostics</h2>
-        <span className="text-[var(--sc-text-secondary)]">{diagnostics.length} total</span>
+        <h2 className="text-2xl font-bold text-[var(--sc-text-primary,#111827)]">Diagnostics</h2>
+        <span className="text-[var(--sc-text-secondary,#6b7280)]">{diagnostics.length} total</span>
       </div>
-      <div className="bg-[var(--sc-bg)] rounded-lg shadow-sm border border-[var(--sc-border)] p-6">
+      <div className="bg-[var(--sc-bg,#ffffff)] rounded-lg shadow-sm border border-[var(--sc-border,#e5e7eb)] p-6">
         {/* Filter buttons */}
         <div className="flex flex-wrap gap-2 mb-4">
           <FilterButton
@@ -117,7 +119,7 @@ export default function DiagnosticsSection({ diagnostics }: DiagnosticsSectionPr
         {/* Diagnostics list */}
         <div className="space-y-2 max-h-96 overflow-y-auto">
           {displayDiagnostics.length === 0 ? (
-            <p className="text-[var(--sc-text-muted)] py-4">
+            <p className="text-[var(--sc-text-muted,#9ca3af)] py-4">
               No diagnostics for this severity level.
             </p>
           ) : (
@@ -157,7 +159,7 @@ function FilterButton({
   count,
   active,
   onClick,
-  color = 'bg-[var(--sc-section)] text-[var(--sc-text-secondary)]',
+  color = 'bg-[var(--sc-section,#f3f4f6)] text-[var(--sc-text-secondary,#6b7280)]',
   activeColor = 'bg-gray-700 text-white',
   disabled = false,
 }: FilterButtonProps) {
@@ -167,7 +169,7 @@ function FilterButton({
       disabled={disabled}
       className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
         disabled
-          ? 'bg-[var(--sc-section)] text-[var(--sc-text-muted)] cursor-not-allowed'
+          ? 'bg-[var(--sc-section,#f3f4f6)] text-[var(--sc-text-muted,#9ca3af)] cursor-not-allowed'
           : active
             ? `${activeColor} cursor-pointer`
             : `${color} hover:opacity-80 cursor-pointer`
@@ -202,7 +204,7 @@ function DiagnosticItem({ diagnostic, pathsExpanded, onTogglePaths }: Diagnostic
         <span className="font-mono font-semibold text-sm">{code}</span>
         <span className="text-xs opacity-70">{source}</span>
       </div>
-      <p className="mt-1 text-sm">{message}</p>
+      <p className="mt-1 text-sm text-gray-700 dark:text-slate-300">{message}</p>
 
       {singlePath && (
         <p className="mt-2 font-mono text-xs opacity-70 truncate" title={singlePath}>

@@ -389,7 +389,7 @@ added to `packages/formatter-html/src/app/` and re-exported from the `./react` e
 **Depends on:** none (self-contained)
 **Priority:** Medium–High
 
-- Set `darkMode: 'class'` in the Tailwind config for `packages/formatter-html/`
+- Add `@custom-variant dark (&:where(.dark, .dark *));` to `packages/formatter-html/src/app/index.css` (Tailwind v4 uses CSS configuration rather than a `darkMode` config key)
 - Add `dark:` background, text, and border variants to all components in `packages/formatter-html/src/app/` — `SummaryCard`, `DimensionCard`, `SignalCard`, `DiagnosticsSection`, `CircularProgress`, `GradeBadge`, `ApiMetadataCard`, and the `App` wrapper
 - Update the comment in `packages/formatter-html/src/app/colors.ts` to document the dark mode strategy: `./react` consumers activate via `class="dark"` on a parent element; standalone HTML handles it via injected script
 - Inject a vanilla JS dark mode script into the standalone HTML in `src/index.ts` (`injectScorecard()`): reads `prefers-color-scheme: dark` on load, sets `class="dark"` on `<html>`, and renders a sun/moon toggle button

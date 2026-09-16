@@ -48,11 +48,16 @@ const DARK_MODE_SCRIPT = `<script>
   var stored = readStore();
   applyDark(stored !== null ? stored === '1' : (mq ? mq.matches : false));
   if (mq) {
-    mq.addEventListener('change', function (e) {
+    var onChange = function (e) {
       if (readStore() === null) {
         applyDark(e.matches);
       }
-    });
+    };
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', onChange);
+    } else if (typeof mq.addListener === 'function') {
+      mq.addListener(onChange);
+    }
   }
   document.addEventListener('DOMContentLoaded', function () {
     var btn = document.createElement('button');

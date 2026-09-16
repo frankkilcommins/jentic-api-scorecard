@@ -205,15 +205,17 @@ Surface colours are expressed as CSS custom properties. Define these on the pare
 | `--sc-text-muted` | `#9ca3af` | `#A3CACC` |
 | `--sc-border` | `#e5e7eb` | `#305256` |
 | `--cp-track` | `#e5e7eb` | `#305256` |
-| `--score-color-a` | `hsl(142,71%,45%)` | `hsl(142,60%,55%)` |
-| `--score-color-b` | `hsl(165,82%,35%)` | `hsl(165,70%,45%)` |
-| `--score-color-c` | `hsl(45,93%,47%)` | `hsl(45,90%,60%)` |
-| `--score-color-d` | `hsl(25,95%,53%)` | `hsl(25,90%,62%)` |
-| `--score-color-f` | `hsl(0,84%,60%)` | `hsl(0,75%,65%)` |
+| `--score-color-a` | `hsl(142,71%,45%)` | `hsl(142,63%,60%)` |
+| `--score-color-b` | `hsl(165,82%,35%)` | `hsl(165,72%,52%)` |
+| `--score-color-c` | `hsl(45,93%,47%)` | `hsl(45,88%,62%)` |
+| `--score-color-d` | `hsl(25,95%,53%)` | `hsl(25,90%,65%)` |
+| `--score-color-f` | `hsl(0,84%,60%)` | `hsl(0,80%,68%)` |
 
-The `--score-color-*` variables drive score arcs (`CircularProgress`), grade colors
-(`GradeBadge`), and signal border accents (`DimensionCard`). All thirteen variables are
-required for correctly styled output.
+The `--score-color-*` variables drive score arcs (`CircularProgress`), grade text
+(`SummaryCard`), and signal score/border accents (`SignalCard`). `GradeBadge` uses its own
+Tailwind grade classes. Define the dark variants in `.dark { ... }` to enable dark mode score
+colouring; the light values are baked in as CSS fallbacks so light mode works without any
+variable definitions.
 
 To use the `class="dark"` strategy, configure your Tailwind setup:
 

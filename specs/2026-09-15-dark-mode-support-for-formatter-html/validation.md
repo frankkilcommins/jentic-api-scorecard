@@ -74,7 +74,7 @@ The `.dark` block in `index.css` sets:
 
 ### 8. Standalone HTML dark mode script is present
 
-`injectScorecard()` in `packages/formatter-html/src/index.ts` calls `injectDarkMode()`, and `injectDarkMode()` inserts a `<script>` block before `</head>` containing `prefers-color-scheme`, `jentic-scorecard-dark` (localStorage key), and `id="dark-mode-toggle"`.
+`injectScorecard()` in `packages/formatter-html/src/index.ts` calls `injectDarkMode()`, and `injectDarkMode()` inserts a `<script>` block before `</head>` containing `prefers-color-scheme`, `jentic-scorecard-dark` (localStorage key), and `'dark-mode-toggle'` (the toggle ID is assigned by the injected script at runtime, not as an HTML attribute).
 
 ### 9. Roadmap heading updated
 
