@@ -30,7 +30,28 @@
 
 ## Root cause
 
-<!-- Fill in after merging — why did the spec miss these? -->
+1. Implicit scope assumptions in task wording
+
+Task 18 said "apply CSS variable substitution and Jentic-aligned dark severity classes to the signal components" and listed 8 by name. The list was drawn from the components that had the most obvious surface-color usage. Three
+components (SpecValidityMetadata, StructuralIntegrityMetadata, DescriptiveRichnessMetadata) had smaller, contextual colour uses — success boxes, a single border class — that weren't front-of-mind when the spec was scaffolded.
+LintResultsMetadata's severity count spans were inline <span> elements rather than container backgrounds, a different pattern from everything else, so they weren't caught by the same mental sweep.
+
+The root cause: the spec was written top-down from "what changes most visibly" rather than bottom-up from a full grep of hard-coded colour classes. A grep -r "text-gray\|bg-white\|border-gray" pass before writing task 18 would have
+caught all of them.
+
+2. Visibility decisions left implicit
+
+The plan said "add injectDarkMode(html: string): string function" — it described the signature and behaviour, but said nothing about whether to export it. The default instinct when you write a named, well-typed function is to export it.
+  The question of whether a consumer would ever call it directly wasn't asked during spec scaffolding, only during review.
+
+3. Test assertion written against intent rather than implementation
+
+The spec said assert id="dark-mode-toggle" — that's the intended DOM outcome. But the button is assembled in JavaScript (btn.id = 'dark-mode-toggle'), not rendered as static HTML. The spec author checked "does the toggle button exist"
+conceptually, without asking "does id=... appear as a literal string in the HTML document the test receives." A quick look at the script during spec writing would have surfaced the distinction.
+
+
+All three come from the same place: the spec was scaffolded before the implementation existed, so it described intended outcomes without tracing through how those outcomes would actually be produced. The closer a task gets to
+implementation detail — exact class lists, function visibility, how a test assertion maps to output bytes — the more the spec needs to be grounded in the actual code, not just the goal.
 
 ## Lesson for future specs
 
